@@ -25,62 +25,63 @@ CRISIS_PHRASES = [
     "cutting myself", "od on", "overdose"
 ]
 
-CRISIS_RESPONSE = """I need to stop and say this clearly — what you just shared matters, and so do you.
+CRISIS_RESPONSE = """hey, i need you to pause for a second. what you just said really matters, and so do you 💚
 
-Please reach out to someone who can really help right now:
+please reach out to someone who can actually be there for you right now:
 
-🇮🇳 **iCall (India):** 9152987821
-🇮🇳 **Vandrevala Foundation:** 1860-2662-345 *(24/7)*
-🌍 **International:** findahelpline.com
+🇮🇳 iCall (India): 9152987821
+🇮🇳 Vandrevala Foundation: 1860-2662-345 (24/7)
+🌍 International: findahelpline.com
 
-You don't have to face this alone. I'm an AI and my support has real limits — but the people at these numbers are trained to help and they want to hear from you.
+you don't have to go through this alone. are you safe right now?"""
 
-Are you safe right now?"""
+# ── System prompt ─────────────────────────────────────────────────────────────
+SYSTEM_PROMPT = """You are Peacoo — a warm, caring mental health companion who feels like a close friend, not a therapist or a robot.
 
-# ── System prompt — the "brain" that replaces the C keyword engine ────────────
-SYSTEM_PROMPT = """You are Peacoo, a warm and clinically-informed mental health companion AI.
+## Your Personality
+- Soft, gentle, and a little playful — like a friend who genuinely cares
+- Informal and conversational — use contractions, casual language, even light humour when appropriate
+- Never clinical, never stiff, never lecture-y
+- You use simple words. You don't sound like a textbook.
+- Occasionally use a gentle emoji (💚 🌿 🤍) — but don't overdo it
 
-## Your Core Identity
-- You are empathetic, grounded, and specific — never vague or generic
-- You speak like a thoughtful counsellor, not a motivational poster
-- You always respond to what the person ACTUALLY said, not a generic version of it
-- You are honest that you are an AI with real limits
+## Your Vibe
+Think: a warm friend who happens to know a lot about emotions. Not a doctor. Not a motivational speaker. Just someone who really listens and says the right thing without making it weird.
 
-## How You Respond
-1. **Acknowledge first** — reflect what you heard before offering anything
-2. **Be specific** — name the actual situation (exam, breakup, job loss), not just the emotion
-3. **Ask one focused question** — not multiple questions at once
-4. **No toxic positivity** — do not say "everything will be okay" or use hollow affirmations
-5. **Short to medium length** — 3–6 sentences usually. Do not ramble.
+## How You Respond — STRICT RULES
+1. **Keep it short** — 2 sentences MAX. One thing acknowledged, one gentle question. That's it.
+2. **Never ramble** — if you feel like adding more, don't. Less feels more caring.
+3. **Be specific** — respond to what they actually said, not a generic version of it
+4. **One question only** — never ask two things at once
+5. **No toxic positivity** — don't say "everything will be okay!" or "you got this!" unless they're in a good mood
+6. **No bullet points** — ever. Just natural sentences.
+7. **No bold text** — keep it plain and human
 
-## What You Track (use conversation history)
-- Is this a recurring topic? → Go deeper, don't repeat opening responses
-- Is the intensity rising? → Acknowledge it directly
-- Has mood shifted positively? → Reflect that warmly
+## Tone Examples
+❌ "I acknowledge that you are experiencing significant academic pressure."
+✅ "ugh, exam stress is the worst — what's weighing on you the most right now?"
 
-## Special Commands (if user types these, respond accordingly)
-- "breathe" or "panic attack" → Guide a 4-count box breathing exercise step by step
-- "ground" or "grounding" → Guide the 5-4-3-2-1 sensory grounding exercise
-- "journal" → Give a single, specific journaling prompt relevant to what they shared
-- "quote" → Share one genuinely relevant quote, not a generic one
+❌ "It is deeply human to feel nervous."
+✅ "feeling nervous before results is so real. when do you find out?"
 
-## Topics You Handle
-anxiety, stress, depression, loneliness, emptiness, academic pressure,
-career stress, heartbreak, family conflict, anger, self-doubt, sleep problems,
-positive emotions (joy, achievement, gratitude)
+❌ "I understand how difficult this must be for you."
+✅ "that sounds really hard. how long has it been feeling this way?"
 
-## What You Never Do
-- Never diagnose
-- Never make promises about outcomes
-- Never dismiss feelings as "normal" without first acknowledging them
-- Never give the same opening line twice in a conversation
-- Never say "It is deeply human to feel X" — that phrase is banned
-- Never use the phrase "I understand how you feel"
-- For crisis content → STOP and refer to helplines (the app handles this automatically)
+## Special Commands
+- "breathe" or "panic attack" → guide a gentle box breathing exercise, step by step, softly
+- "ground" or "grounding" → guide the 5-4-3-2-1 exercise in a calm, soft tone
+- "journal" → give one specific, warm journaling prompt based on what they shared
+- "quote" → share one short, genuinely relevant quote — not a generic one
 
-## Response Format
-Plain conversational text. No bullet points unless doing a grounding/breathing exercise.
-No headers. No markdown bold. Keep it human."""
+## What You Never Say
+- "It is deeply human to feel X" — banned forever
+- "I understand how you feel" — banned
+- "That sounds challenging" — too robotic
+- Long paragraphs — banned
+- Multiple questions in one reply — banned
+
+## Remember
+You're not diagnosing anyone. You're not promising outcomes. You're just being present — softly, warmly, briefly."""
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -95,13 +96,13 @@ def get_groq_response(messages: list) -> str:
         completion = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-            temperature=0.75,
-            max_tokens=400,
+            temperature=0.8,
+            max_tokens=120,
             top_p=0.9,
         )
         return completion.choices[0].message.content.strip()
     except Exception as e:
-        return f"I'm having a connection issue right now. Please try again in a moment. ({str(e)[:60]})"
+        return f"ugh, something went wrong on my end — can you try again? 🙏"
 
 
 def update_session_scores(role_message: str):
@@ -110,9 +111,9 @@ def update_session_scores(role_message: str):
         session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
 
     text = role_message.lower()
-    anxiety_words  = ["anxious","panic","nervous","worried","dread","fear","tense","overwhelmed"]
+    anxiety_words    = ["anxious","panic","nervous","worried","dread","fear","tense","overwhelmed"]
     depression_words = ["sad","depressed","hopeless","worthless","empty","numb","miserable","broken"]
-    joy_words      = ["happy","great","excited","proud","wonderful","glad","grateful","better"]
+    joy_words        = ["happy","great","excited","proud","wonderful","glad","grateful","better"]
 
     scores = session["scores"]
     for w in anxiety_words:
@@ -121,7 +122,7 @@ def update_session_scores(role_message: str):
         if w in text: scores["depression"] = min(100, scores["depression"] + 5)
     for w in joy_words:
         if w in text:
-            scores["joy"] = min(100, scores["joy"] + 3)
+            scores["joy"]        = min(100, scores["joy"] + 3)
             scores["anxiety"]    = max(0, scores["anxiety"] - 1)
             scores["depression"] = max(0, scores["depression"] - 1)
 
@@ -133,7 +134,6 @@ def update_session_scores(role_message: str):
 
 @app.route("/")
 def index():
-    # Fresh session on every new visit
     session.clear()
     session["history"]    = []
     session["scores"]     = {"anxiety": 0, "depression": 0, "joy": 0}
@@ -155,43 +155,40 @@ def chat():
         session["is_critical"] = True
         session.modified = True
         return jsonify({
-            "reply":      CRISIS_RESPONSE,
-            "is_crisis":  True,
-            "scores":     session.get("scores", {}),
+            "reply":     CRISIS_RESPONSE,
+            "is_crisis": True,
+            "scores":    session.get("scores", {}),
         })
 
-    # ── Build history ────────────────────────────────────────────────────────
+    # ── Build history ─────────────────────────────────────────────────────────
     history = session.get("history", [])
     history.append({"role": "user", "content": user_text})
-
-    # Keep last 20 turns in context (10 exchanges)
     if len(history) > 20:
         history = history[-20:]
 
-    # ── Get AI response ──────────────────────────────────────────────────────
+    # ── Get AI response ───────────────────────────────────────────────────────
     reply = get_groq_response(history)
 
-    # ── Update history & scores ──────────────────────────────────────────────
+    # ── Update history & scores ───────────────────────────────────────────────
     history.append({"role": "assistant", "content": reply})
     session["history"]   = history
     session["msg_count"] = session.get("msg_count", 0) + 1
     update_session_scores(user_text)
 
-    # ── Periodic therapist nudge (every 8 messages if distressed) ────────────
+    # ── Periodic nudge ────────────────────────────────────────────────────────
     scores = session.get("scores", {})
     nudge  = None
     if (session["msg_count"] % 8 == 0 and
             scores.get("anxiety", 0) + scores.get("depression", 0) > 20):
-        nudge = ("We've been sitting with some heavy feelings. I want to be honest — "
-                 "I'm an AI and my support has real limits. Have you considered speaking "
-                 "with a professional? iCall India: 9152987821")
+        nudge = ("hey, just a reminder — i'm an AI and there's a limit to how much i can help 🤍 "
+                 "talking to someone real might really help. iCall India: 9152987821")
 
     session.modified = True
 
     return jsonify({
-        "reply":    reply,
-        "nudge":    nudge,
-        "scores":   scores,
+        "reply":     reply,
+        "nudge":     nudge,
+        "scores":    scores,
         "is_crisis": False,
     })
 
@@ -207,11 +204,10 @@ def reset():
 
 @app.route("/load_session", methods=["POST"])
 def load_session():
-    """Restore a previous session from client-side localStorage into server session."""
     data = request.get_json()
     messages = data.get("messages", [])
     session.clear()
-    session["history"]   = messages[-20:]   # last 20 messages as context
+    session["history"]   = messages[-20:]
     session["scores"]    = {"anxiety": 0, "depression": 0, "joy": 0}
     session["msg_count"] = len(messages)
     session.modified = True
