@@ -9,6 +9,11 @@
 
 ---
 
+## 🌐 Live Demo
+👉 [https://peacoo-ai.onrender.com](https://peacoo-ai.onrender.com)
+
+---
+
 ## 💚 What is Peacoo?
 
 Peacoo is an AI-powered mental wellness chatbot that talks like a warm, caring friend — not a robot or a therapist. It listens without judgment, responds with empathy, and gently guides you through difficult emotions.
@@ -45,7 +50,7 @@ Built for people who just need someone (or something) to talk to.
 
 **Step 1 — Clone the repo**
 ```bash
-git clone https://github.com/your-username/peacoo_ai.git
+git clone https://github.com/vector1729/peacoo_ai.git
 cd peacoo_ai
 ```
 
