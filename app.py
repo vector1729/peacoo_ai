@@ -205,6 +205,19 @@ def reset():
     return jsonify({"ok": True})
 
 
+@app.route("/load_session", methods=["POST"])
+def load_session():
+    """Restore a previous session from client-side localStorage into server session."""
+    data = request.get_json()
+    messages = data.get("messages", [])
+    session.clear()
+    session["history"]   = messages[-20:]   # last 20 messages as context
+    session["scores"]    = {"anxiety": 0, "depression": 0, "joy": 0}
+    session["msg_count"] = len(messages)
+    session.modified = True
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
