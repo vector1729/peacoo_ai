@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,30 +10,85 @@
 <style>
 /* ── Reset ───────────────────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
+
+/* ── Theme Variables ─────────────────────────────────────────────────── */
+:root {
+  --accent:      #2ecc71;
+  --accent2:     #27ae60;
+  --accent-glow: rgba(46,204,113,0.25);
+  --radius:      16px;
+  --sans:        'Plus Jakarta Sans', sans-serif;
+  --display:     'Sora', sans-serif;
+  --sidebar-w:   300px;
+  --header-h:    64px;
+  --transition:  0.25s ease;
+}
+
+/* DARK THEME (default) */
+[data-theme="dark"] {
   --bg:          #0a1f0a;
   --bg2:         #0d2b0d;
   --surface:     rgba(255,255,255,0.06);
   --surface2:    rgba(255,255,255,0.10);
+  --surface3:    rgba(255,255,255,0.04);
   --border:      rgba(255,255,255,0.10);
-  --accent:      #2ecc71;
-  --accent2:     #27ae60;
-  --accent-glow: rgba(46,204,113,0.25);
+  --border2:     rgba(255,255,255,0.06);
   --text:        #e8f5e8;
   --text-dim:    rgba(232,245,232,0.55);
   --text-dim2:   rgba(232,245,232,0.35);
-  --sidebar-w:   300px;
-  --header-h:    64px;
-  --sans:        'Plus Jakarta Sans', sans-serif;
-  --display:     'Sora', sans-serif;
-  --radius:      16px;
+  --header-bg:   rgba(10,31,10,0.85);
+  --sidebar-bg:  rgba(10,31,10,0.97);
+  --footer-bg:   rgba(10,31,10,0.85);
+  --modal-bg:    #0d2b0d;
+  --bubble-bot:  rgba(255,255,255,0.07);
+  --bubble-user-bg: rgba(46,204,113,0.2);
+  --bubble-user-border: rgba(46,204,113,0.25);
+  --input-bg:    rgba(255,255,255,0.06);
+  --radial1:     rgba(46,204,113,0.12);
+  --radial2:     rgba(39,174,96,0.08);
+  --toggle-bg:   rgba(255,255,255,0.08);
+  --toggle-knob: #2ecc71;
+  --crisis-bg:   rgba(255,107,107,0.08);
+  --crisis-border: rgba(255,107,107,0.3);
+  --crisis-text: #ffaaaa;
 }
+
+/* LIGHT THEME */
+[data-theme="light"] {
+  --bg:          #f0faf0;
+  --bg2:         #e8f5e8;
+  --surface:     rgba(0,0,0,0.05);
+  --surface2:    rgba(0,0,0,0.08);
+  --surface3:    rgba(0,0,0,0.03);
+  --border:      rgba(0,0,0,0.10);
+  --border2:     rgba(0,0,0,0.06);
+  --text:        #1a3320;
+  --text-dim:    rgba(26,51,32,0.60);
+  --text-dim2:   rgba(26,51,32,0.38);
+  --header-bg:   rgba(240,250,240,0.90);
+  --sidebar-bg:  rgba(240,250,240,0.98);
+  --footer-bg:   rgba(240,250,240,0.90);
+  --modal-bg:    #ffffff;
+  --bubble-bot:  rgba(0,0,0,0.04);
+  --bubble-user-bg: rgba(46,204,113,0.15);
+  --bubble-user-border: rgba(46,204,113,0.30);
+  --input-bg:    rgba(0,0,0,0.04);
+  --radial1:     rgba(46,204,113,0.10);
+  --radial2:     rgba(39,174,96,0.06);
+  --toggle-bg:   rgba(0,0,0,0.10);
+  --toggle-knob: #27ae60;
+  --crisis-bg:   rgba(220,50,50,0.06);
+  --crisis-border: rgba(220,50,50,0.25);
+  --crisis-text: #b91c1c;
+}
+
 html,body{height:100%;overflow:hidden;font-family:var(--sans)}
 body{
   background:var(--bg);
   color:var(--text);
   display:flex;
   flex-direction:column;
+  transition:background var(--transition), color var(--transition);
 }
 
 /* ── Animated background ─────────────────────────────────────────────── */
@@ -41,21 +96,22 @@ body::before{
   content:'';
   position:fixed;inset:0;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(46,204,113,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(39,174,96,0.08) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 60% at 20% 10%, var(--radial1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, var(--radial2) 0%, transparent 60%);
   pointer-events:none;z-index:0;
+  transition:background var(--transition);
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar{
   position:fixed;top:0;left:0;bottom:0;
   width:var(--sidebar-w);
-  background:rgba(10,31,10,0.97);
+  background:var(--sidebar-bg);
   border-right:1px solid var(--border);
   backdrop-filter:blur(20px);
   z-index:100;
   transform:translateX(-100%);
-  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  transition:transform .3s cubic-bezier(.4,0,.2,1), background var(--transition);
   display:flex;flex-direction:column;
 }
 #sidebar.open{transform:translateX(0)}
@@ -146,11 +202,12 @@ header{
   height:var(--header-h);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 20px;
-  background:rgba(10,31,10,0.8);
+  background:var(--header-bg);
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(20px);
   position:relative;z-index:10;
   flex-shrink:0;
+  transition:background var(--transition);
 }
 
 .header-left{display:flex;align-items:center;gap:14px}
@@ -163,7 +220,6 @@ header{
   transition:all .2s;flex-direction:column;gap:4px;padding:10px;
 }
 .btn-menu:hover{background:var(--surface2);border-color:rgba(46,204,113,0.4)}
-.menu-dot{width:4px;height:4px;border-radius:50%;background:var(--text)}
 .menu-line{width:16px;height:1.5px;border-radius:99px;background:var(--text);transition:all .2s}
 
 .header-brand{display:flex;align-items:center;gap:10px}
@@ -254,6 +310,7 @@ main{
 .welcome-title{
   font-family:var(--display);font-size:2.4rem;font-weight:700;
   text-align:center;line-height:1.2;margin-bottom:8px;
+  color:var(--text);
 }
 .welcome-title span{
   background:linear-gradient(135deg,#2ecc71,#7dffb3);
@@ -322,22 +379,24 @@ main{
 .bubble{
   max-width:75%;padding:13px 17px;
   line-height:1.7;font-size:.9rem;border-radius:18px;
+  transition:background var(--transition), border-color var(--transition);
 }
 .msg.bot .bubble{
-  background:rgba(255,255,255,0.07);
+  background:var(--bubble-bot);
   border:1px solid var(--border);
+  color:var(--text);
   border-bottom-left-radius:5px;
 }
 .msg.user .bubble{
-  background:linear-gradient(135deg,rgba(46,204,113,0.2),rgba(39,174,96,0.15));
-  border:1px solid rgba(46,204,113,0.25);
+  background:var(--bubble-user-bg);
+  border:1px solid var(--bubble-user-border);
   color:var(--text);
   border-bottom-right-radius:5px;
 }
 .msg.crisis .bubble{
-  background:rgba(255,107,107,0.08);
-  border:1px solid rgba(255,107,107,0.3);
-  color:#ffaaaa;
+  background:var(--crisis-bg);
+  border:1px solid var(--crisis-border);
+  color:var(--crisis-text);
 }
 
 /* ── Typing ──────────────────────────────────────────────────────────── */
@@ -347,7 +406,7 @@ main{
 }
 .typing-bubble{
   padding:14px 18px;
-  background:rgba(255,255,255,0.07);
+  background:var(--bubble-bot);
   border:1px solid var(--border);
   border-radius:18px;border-bottom-left-radius:5px;
   display:flex;gap:5px;align-items:center;
@@ -364,7 +423,6 @@ main{
   40%{transform:translateY(-6px);opacity:1}
 }
 
-/* Human-like typing cursor in bot bubble */
 .typing-cursor{
   display:inline-block;width:2px;height:1em;
   background:var(--accent);margin-left:2px;
@@ -388,18 +446,19 @@ main{
 /* ── Input footer ────────────────────────────────────────────────────── */
 footer{
   padding:16px 20px 20px;
-  background:rgba(10,31,10,0.8);
+  background:var(--footer-bg);
   border-top:1px solid var(--border);
   backdrop-filter:blur(20px);
   position:relative;z-index:10;flex-shrink:0;
+  transition:background var(--transition);
 }
 .input-wrap{
   max-width:700px;margin:0 auto;
   display:flex;gap:10px;align-items:flex-end;
-  background:var(--surface);
+  background:var(--input-bg);
   border:1px solid var(--border);
   border-radius:20px;padding:8px 8px 8px 18px;
-  transition:border-color .2s;
+  transition:border-color .2s, background var(--transition);
 }
 .input-wrap:focus-within{border-color:rgba(46,204,113,0.5)}
 #msg-input{
@@ -427,23 +486,24 @@ footer{
   text-align:center;letter-spacing:.03em;
 }
 
-/* ── Info modal ──────────────────────────────────────────────────────── */
-#info-modal{
+/* ── Info modal (shared base) ────────────────────────────────────────── */
+.modal-overlay{
   position:fixed;inset:0;z-index:200;
   display:flex;align-items:center;justify-content:center;
   padding:20px;
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
-#info-modal.show{opacity:1;pointer-events:all}
+.modal-overlay.show{opacity:1;pointer-events:all}
 .modal-bg{
-  position:absolute;inset:0;background:rgba(0,0,0,0.6);
+  position:absolute;inset:0;background:rgba(0,0,0,0.55);
   backdrop-filter:blur(8px);
 }
 .modal-card{
   position:relative;z-index:1;
-  background:#0d2b0d;border:1px solid var(--border);
-  border-radius:20px;padding:28px;max-width:380px;width:100%;
+  background:var(--modal-bg);border:1px solid var(--border);
+  border-radius:20px;padding:28px;max-width:400px;width:100%;
   animation:modal-in .25s ease;
+  transition:background var(--transition);
 }
 @keyframes modal-in{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
 .modal-card h3{
@@ -456,7 +516,7 @@ footer{
 .modal-card .helpline{
   background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.2);
   border-radius:12px;padding:12px;margin-top:12px;
-  font-size:.82rem;line-height:1.8;
+  font-size:.82rem;line-height:1.8;color:var(--text-dim);
 }
 .modal-close{
   position:absolute;top:16px;right:16px;
@@ -464,8 +524,100 @@ footer{
   background:var(--surface);border:1px solid var(--border);
   color:var(--text-dim);cursor:pointer;font-size:14px;
   display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
 }
 .modal-close:hover{background:var(--surface2);color:var(--text)}
+
+/* ── Settings Modal specific ─────────────────────────────────────────── */
+.settings-section{
+  margin-bottom:20px;
+}
+.settings-section:last-child{margin-bottom:0}
+.settings-label{
+  font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-dim2);font-weight:600;margin-bottom:12px;
+}
+
+/* Theme toggle row */
+.theme-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:12px 16px;
+}
+.theme-toggle-info{display:flex;align-items:center;gap:10px}
+.theme-icon{font-size:1.2rem}
+.theme-text{font-size:.88rem;color:var(--text);font-weight:500}
+.theme-subtext{font-size:.75rem;color:var(--text-dim);margin-top:1px}
+
+/* iOS-style toggle switch */
+.toggle-switch{
+  position:relative;width:48px;height:26px;flex-shrink:0;
+}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{
+  position:absolute;inset:0;
+  background:var(--toggle-bg);
+  border-radius:99px;cursor:pointer;
+  border:1px solid var(--border);
+  transition:background .3s, border-color .3s;
+}
+.toggle-switch input:checked + .toggle-track{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-color:var(--accent2);
+}
+.toggle-knob{
+  position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;
+  background:#ffffff;
+  box-shadow:0 1px 4px rgba(0,0,0,0.25);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+.toggle-switch input:checked ~ .toggle-track .toggle-knob{
+  transform:translateX(22px);
+}
+
+/* Theme preview mini cards */
+.theme-previews{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;
+}
+.theme-preview-card{
+  border-radius:10px;padding:10px 12px;cursor:pointer;
+  border:2px solid transparent;
+  transition:border-color .2s, transform .15s;
+  position:relative;
+}
+.theme-preview-card:hover{transform:translateY(-1px)}
+.theme-preview-card.selected{border-color:var(--accent)}
+.preview-dark{background:#0a1f0a}
+.preview-light{background:#f0faf0;border:1px solid rgba(0,0,0,0.1)}
+.preview-bar{height:4px;border-radius:99px;margin-bottom:6px;width:60%}
+.preview-dark .preview-bar{background:#2ecc71}
+.preview-light .preview-bar{background:#27ae60}
+.preview-lines{display:flex;flex-direction:column;gap:3px}
+.preview-line{height:3px;border-radius:99px}
+.preview-dark .preview-line{background:rgba(255,255,255,0.15)}
+.preview-light .preview-line{background:rgba(0,0,0,0.12)}
+.preview-line.short{width:50%}
+.preview-label{
+  font-size:.72rem;font-weight:600;margin-top:6px;
+}
+.preview-dark .preview-label{color:rgba(232,245,232,0.6)}
+.preview-light .preview-label{color:rgba(26,51,32,0.6)}
+.preview-check{
+  position:absolute;top:6px;right:6px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#0a1f0a;font-weight:700;
+  opacity:0;transition:opacity .2s;
+}
+.theme-preview-card.selected .preview-check{opacity:1}
+
+/* Settings divider */
+.settings-divider{
+  height:1px;background:var(--border);margin:16px 0;
+}
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media(max-width:560px){
@@ -473,6 +625,7 @@ footer{
   .bubble{max-width:88%;font-size:.87rem}
   .chat-inner{padding:0 12px}
   footer{padding:12px 12px 16px}
+  .theme-previews{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -499,7 +652,6 @@ footer{
 <!-- ── Header ─────────────────────────────────────────────────────────────── -->
 <header>
   <div class="header-left">
-    <!-- 3-line hamburger menu -->
     <button class="btn-menu" onclick="openSidebar()" title="Chat History">
       <div class="menu-line"></div>
       <div class="menu-line" style="width:11px;align-self:flex-start"></div>
@@ -513,18 +665,16 @@ footer{
   </div>
   <div class="header-right">
     <button class="icon-btn" onclick="newSession()" title="New Session">
-      <!-- refresh icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
         <path d="M3 3v5h5"/>
       </svg>
     </button>
-    <button class="icon-btn" onclick="showInfo()" title="About & Helplines">
-      <!-- info icon -->
+    <!-- Settings icon (was info icon) -->
+    <button class="icon-btn" onclick="showSettings()" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="16" x2="12" y2="12"/>
-        <line x1="12" y1="8" x2="12.01" y2="8"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
     </button>
   </div>
@@ -532,7 +682,6 @@ footer{
 
 <!-- ── Main ───────────────────────────────────────────────────────────────── -->
 <main>
-  <!-- Welcome screen -->
   <div id="welcome-screen">
     <div class="robot-avatar">
       <div class="robot-antenna"></div>
@@ -550,7 +699,6 @@ footer{
     </div>
   </div>
 
-  <!-- Chat screen -->
   <div id="chat-screen" class="hidden">
     <div class="chat-inner" id="chat-inner"></div>
   </div>
@@ -570,24 +718,133 @@ footer{
   <p class="footer-hint">• Peacoo is here with you • Not a substitute for professional care • Made with ❤️ by Anshu Chaudhary •</p>
 </footer>
 
-<!-- ── Info Modal ─────────────────────────────────────────────────────────── -->
-<div id="info-modal">
-  <div class="modal-bg" onclick="hideInfo()"></div>
+<!-- ── Settings Modal ─────────────────────────────────────────────────────── -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-bg" onclick="hideSettings()"></div>
   <div class="modal-card">
-    <button class="modal-close" onclick="hideInfo()">✕</button>
-    <h3>🤖 About Peacoo</h3>
-    <p>Peacoo is an AI-powered mental wellness companion. It listens without judgment and helps you work through difficult emotions.</p>
-    <p>Peacoo is <strong>not</strong> a replacement for professional mental health care.</p>
-    <div class="helpline">
-      <strong style="color:var(--accent)">🆘 Crisis Helplines</strong><br>
-      🇮🇳 iCall India: <strong>9152987821</strong><br>
-      🇮🇳 Vandrevala Foundation: <strong>1860-2662-345</strong> (24/7)<br>
-      🌍 International: <strong>findahelpline.com</strong>
+    <button class="modal-close" onclick="hideSettings()">✕</button>
+    <h3>⚙️ Settings</h3>
+
+    <!-- Appearance -->
+    <div class="settings-section">
+      <div class="settings-label">Appearance</div>
+
+      <div class="theme-toggle-row">
+        <div class="theme-toggle-info">
+          <div class="theme-icon" id="theme-icon">🌙</div>
+          <div>
+            <div class="theme-text" id="theme-text">Dark Mode</div>
+            <div class="theme-subtext" id="theme-subtext">Easy on the eyes at night</div>
+          </div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked)">
+          <div class="toggle-track">
+            <div class="toggle-knob"></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Visual preview cards -->
+      <div class="theme-previews">
+        <div class="theme-preview-card preview-dark" id="preview-dark" onclick="setTheme('dark')">
+          <div class="preview-check">✓</div>
+          <div class="preview-bar"></div>
+          <div class="preview-lines">
+            <div class="preview-line"></div>
+            <div class="preview-line short"></div>
+            <div class="preview-line"></div>
+          </div>
+          <div class="preview-label">🌙 Dark</div>
+        </div>
+        <div class="theme-preview-card preview-light" id="preview-light" onclick="setTheme('light')">
+          <div class="preview-check">✓</div>
+          <div class="preview-bar"></div>
+          <div class="preview-lines">
+            <div class="preview-line"></div>
+            <div class="preview-line short"></div>
+            <div class="preview-line"></div>
+          </div>
+          <div class="preview-label">☀️ Light</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- About -->
+    <div class="settings-section">
+      <div class="settings-label">About Peacoo</div>
+      <p style="font-size:.85rem;color:var(--text-dim);line-height:1.7;margin-bottom:0">
+        Peacoo is a gentle AI wellness companion, built with care by <strong style="color:var(--accent)">Anshu Chaudhary</strong> — someone who believes everyone deserves a calm space to breathe and be heard. 🌿
+      </p>
+      <p style="font-size:.82rem;color:var(--text-dim2);margin-top:8px;line-height:1.6">
+        Not a replacement for professional care.
+      </p>
+      <div class="helpline">
+        <strong style="color:var(--accent)">🆘 Crisis Helplines</strong><br>
+        🇮🇳 iCall India: <strong>9152987821</strong><br>
+        🇮🇳 Vandrevala Foundation: <strong>1860-2662-345</strong> (24/7)<br>
+        🌍 International: <strong>findahelpline.com</strong>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════════════
+ * THEME MANAGEMENT
+ * ═══════════════════════════════════════════════════════════════════════ */
+function getCurrentTheme() {
+  return localStorage.getItem('peacoo_theme') || 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('peacoo_theme', theme);
+
+  // Update toggle state
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) toggle.checked = (theme === 'light');
+
+  // Update label text
+  const icon    = document.getElementById('theme-icon');
+  const text    = document.getElementById('theme-text');
+  const subtext = document.getElementById('theme-subtext');
+  if (theme === 'light') {
+    icon.textContent    = '☀️';
+    text.textContent    = 'Light Mode';
+    subtext.textContent = 'Bright and easy to read';
+  } else {
+    icon.textContent    = '🌙';
+    text.textContent    = 'Dark Mode';
+    subtext.textContent = 'Easy on the eyes at night';
+  }
+
+  // Update preview card selection
+  document.getElementById('preview-dark').classList.toggle('selected',  theme === 'dark');
+  document.getElementById('preview-light').classList.toggle('selected', theme === 'light');
+}
+
+function toggleTheme(isLight) {
+  setTheme(isLight ? 'light' : 'dark');
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  // Sync toggle checkbox
+  document.getElementById('theme-toggle').checked = (theme === 'light');
+}
+
+/* ── Apply saved theme immediately on load ── */
+applyTheme(getCurrentTheme());
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * SETTINGS MODAL
+ * ═══════════════════════════════════════════════════════════════════════ */
+function showSettings() { document.getElementById('settings-modal').classList.add('show') }
+function hideSettings() { document.getElementById('settings-modal').classList.remove('show') }
+
 /* ═══════════════════════════════════════════════════════════════════════
  * STATE
  * ═══════════════════════════════════════════════════════════════════════ */
@@ -606,12 +863,6 @@ function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
- * INFO MODAL
- * ═══════════════════════════════════════════════════════════════════════ */
-function showInfo() { document.getElementById('info-modal').classList.add('show') }
-function hideInfo() { document.getElementById('info-modal').classList.remove('show') }
 
 /* ═══════════════════════════════════════════════════════════════════════
  * SESSION / HISTORY  (localStorage)
@@ -639,7 +890,6 @@ function saveCurrentSession(messages) {
   };
   if (idx >= 0) sessions[idx] = entry;
   else sessions.unshift(entry);
-  // keep max 30 sessions
   sessions = sessions.slice(0, 30);
   saveSessions(sessions);
 }
@@ -682,14 +932,12 @@ function loadSession(id) {
   if (!session) return;
   currentSessionId = id;
 
-  // restore session on server
   fetch('/load_session', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ messages: session.messages })
   });
 
-  // render messages
   showChatScreen();
   const inner = document.getElementById('chat-inner');
   inner.innerHTML = '';
@@ -708,7 +956,6 @@ function newSession() {
   currentSessionId = 'session_' + Date.now();
   fetch('/reset', { method:'POST' });
 
-  // back to welcome
   document.getElementById('chat-screen').classList.add('hidden');
   document.getElementById('welcome-screen').classList.remove('hidden');
   document.getElementById('chat-inner').innerHTML = '';
@@ -758,7 +1005,6 @@ function appendBotBubbleInstant(text) {
   document.getElementById('chat-inner').appendChild(div);
 }
 
-/* Human-like typewriter for bot responses */
 function typewriterBot(text, isCrisis=false) {
   return new Promise(resolve => {
     const div = document.createElement('div');
@@ -777,16 +1023,13 @@ function typewriterBot(text, isCrisis=false) {
     document.getElementById('chat-inner').appendChild(div);
     scrollBottom();
 
-    // Vary speed: faster for long text, slower for short
     const baseDelay = text.length > 200 ? 12 : 22;
     let i = 0;
 
     function typeChar() {
       if (i < text.length) {
-        // Insert char before cursor
         bubble.insertBefore(document.createTextNode(text[i]), cursor);
         i++;
-        // Natural pauses at punctuation
         let delay = baseDelay + Math.random() * 8;
         if ('.!?'.includes(text[i-1])) delay += 180;
         else if (',;:'.includes(text[i-1])) delay += 80;
@@ -794,7 +1037,6 @@ function typewriterBot(text, isCrisis=false) {
         setTimeout(typeChar, delay);
       } else {
         cursor.remove();
-        // Re-render with proper HTML (bold, line breaks)
         bubble.innerHTML = formatText(text);
         scrollBottom();
         resolve();
@@ -826,7 +1068,6 @@ function hideTypingIndicator() {
 /* ═══════════════════════════════════════════════════════════════════════
  * SEND MESSAGE
  * ═══════════════════════════════════════════════════════════════════════ */
-// Track messages for history
 let localMessages = [];
 
 async function sendMessage() {
@@ -834,7 +1075,6 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text || isTyping) return;
 
-  // First message — switch to chat screen
   if (!currentSessionId) currentSessionId = 'session_' + Date.now();
   showChatScreen();
 
@@ -846,7 +1086,6 @@ async function sendMessage() {
   appendUserBubble(text);
   localMessages.push({ role:'user', content:text });
 
-  // Short "thinking" pause then show dots
   await delay(300);
   showTypingIndicator();
 
@@ -858,7 +1097,6 @@ async function sendMessage() {
     });
     const data = await res.json();
 
-    // Simulate reading time before starting to type
     const readDelay = Math.min(600 + text.length * 8, 1800);
     await delay(readDelay);
     hideTypingIndicator();
@@ -874,7 +1112,6 @@ async function sendMessage() {
       scrollBottom();
     }
 
-    // Save to localStorage history
     saveCurrentSession(localMessages);
 
   } catch(err) {
@@ -906,7 +1143,7 @@ msgInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 
-/* ── Init ──────────────────────────────────────────────────────────── */
+/* ── Init ────────────────────────────────────────────────────────────── */
 msgInput.focus();
 currentSessionId = 'session_' + Date.now();
 </script>
