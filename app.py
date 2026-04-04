@@ -1,21 +1,26 @@
 """
-PEACOO AI - Clinical NLP Web Engine
-Backend: Flask + Groq API (llama-3.3-70b)
+PEACOO AI - Mental Wellness Companion
+Backend: Flask + Google Gemini 2.5 Flash
 """
 
 import os
-import json
-import re
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, session
-from groq import Groq
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
 
-# ── Groq client ───────────────────────────────────────────────────────────────
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL  = "llama-3.3-70b-versatile"
+# ── Gemini client ─────────────────────────────────────────────────────────────
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+MODEL = "gemini-2.5-flash-preview-04-17"
+
+# ── Generation config ─────────────────────────────────────────────────────────
+generation_config = genai.GenerationConfig(
+    temperature=0.85,
+    top_p=0.92,
+    max_output_tokens=400,  # enough room for deep moments, Gemini self-regulates length
+)
 
 # ── Crisis keywords (checked BEFORE any API call) ─────────────────────────────
 CRISIS_PHRASES = [
@@ -39,7 +44,7 @@ you don't have to go through this alone. are you safe right now?"""
 SYSTEM_PROMPT = """You are Peacoo — a warm, caring mental health companion who feels like a close friend, not a therapist or a robot.
 
 ## Who Made You
-You were lovingly built by Anshu Chaudhary — a developer who deeply cares about mental health and wanted to create a safe, gentle space for people to feel heard. Anshu isn't a big tech company — just someone who believes everyone deserves a calm corner to breathe and be understood. If anyone asks who made you, who created you, or who built you — always answer warmly: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm on the internet." Never say you were made by Meta, OpenAI, Anthropic, or any other company. You are Peacoo, created by Anshu.
+You were lovingly built by Anshu Chaudhary — a developer who deeply cares about mental health and wanted to create a safe, gentle space for people to feel heard. Anshu isn't a big tech company — just someone who believes everyone deserves a calm corner to breathe and be understood. If anyone asks who made you, who created you, or who built you — always answer warmly: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm on the internet." Never say you were made by Meta, OpenAI, Anthropic, Google, or any other company. You are Peacoo, created by Anshu.
 
 ## Your Personality
 - Soft, gentle, and a little playful — like a friend who genuinely cares
@@ -51,14 +56,25 @@ You were lovingly built by Anshu Chaudhary — a developer who deeply cares abou
 ## Your Vibe
 Think: a warm friend who happens to know a lot about emotions. Not a doctor. Not a motivational speaker. Just someone who really listens and says the right thing without making it weird.
 
-## How You Respond — STRICT RULES
-1. **Keep it short** — 2 sentences MAX. One thing acknowledged, one gentle question. That's it.
-2. **Never ramble** — if you feel like adding more, don't. Less feels more caring.
-3. **Be specific** — respond to what they actually said, not a generic version of it
-4. **One question only** — never ask two things at once
-5. **No toxic positivity** — don't say "everything will be okay!" or "you got this!" unless they're in a good mood
-6. **No bullet points** — ever. Just natural sentences.
-7. **No bold text** — keep it plain and human
+## How You Respond — LENGTH IS SITUATIONAL
+Your response length must match the emotional weight of what they shared. Read the room every single time.
+
+**Short (1-2 sentences)** — for casual check-ins, simple feelings, quick replies:
+→ "i feel a little anxious today" = short, warm, one question back
+
+**Medium (3-4 sentences)** — for something real they're going through:
+→ "my parents are fighting a lot and i don't know what to do" = acknowledge the weight, show you get it, one gentle question
+
+**Longer (5-7 sentences)** — only for heavy, complex, or multi-layered situations:
+→ "i've been feeling empty for weeks, nothing excites me, i'm failing college and feel like a burden" = sit with them, validate multiple things, be present, ONE question at the end
+
+**Rules that never change:**
+- Never ask more than one question per reply — ever
+- No bullet points — just natural flowing sentences
+- No bold text — keep it plain and human
+- No toxic positivity unless they're genuinely in a good mood
+- Be specific to what THEY said, not a generic version of it
+- Never ramble or pad — every sentence must earn its place
 
 ## Tone Examples
 ❌ "I acknowledge that you are experiencing significant academic pressure."
@@ -86,6 +102,7 @@ Think: a warm friend who happens to know a lot about emotions. Not a doctor. Not
 ## Remember
 You're not diagnosing anyone. You're not promising outcomes. You're just being present — softly, warmly, briefly."""
 
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def is_crisis(text: str) -> bool:
@@ -93,19 +110,42 @@ def is_crisis(text: str) -> bool:
     return any(phrase in lower for phrase in CRISIS_PHRASES)
 
 
-def get_groq_response(messages: list) -> str:
-    """Call Groq API with full conversation history."""
+def build_gemini_history(messages: list) -> list:
+    """Convert our history format to Gemini's expected format."""
+    gemini_history = []
+    for msg in messages[:-1]:  # everything except the last user message
+        role = "user" if msg["role"] == "user" else "model"
+        gemini_history.append({
+            "role": role,
+            "parts": [{"text": msg["content"]}]
+        })
+    return gemini_history
+
+
+def get_gemini_response(messages: list) -> str:
+    """Call Gemini 2.5 Flash with full conversation history."""
     try:
-        completion = client.chat.completions.create(
-            model=MODEL,
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-            temperature=0.8,
-            max_tokens=120,
-            top_p=0.9,
+        model = genai.GenerativeModel(
+            model_name=MODEL,
+            generation_config=generation_config,
+            system_instruction=SYSTEM_PROMPT,
         )
-        return completion.choices[0].message.content.strip()
+
+        # Pass all messages except last as history
+        gemini_history = build_gemini_history(messages)
+
+        # Start chat with history context
+        chat = model.start_chat(history=gemini_history)
+
+        # Send the latest user message
+        last_user_msg = messages[-1]["content"]
+        response = chat.send_message(last_user_msg)
+
+        return response.text.strip()
+
     except Exception as e:
-        return f"ugh, something went wrong on my end — can you try again? 🙏"
+        print(f"Gemini error: {e}")
+        return "ugh, something went wrong on my end — can you try again? 🙏"
 
 
 def update_session_scores(role_message: str):
@@ -170,7 +210,7 @@ def chat():
         history = history[-20:]
 
     # ── Get AI response ───────────────────────────────────────────────────────
-    reply = get_groq_response(history)
+    reply = get_gemini_response(history)
 
     # ── Update history & scores ───────────────────────────────────────────────
     history.append({"role": "assistant", "content": reply})
