@@ -1,26 +1,22 @@
 """
 PEACOO AI - Mental Wellness Companion
-Backend: Flask + Google Gemini 2.5 Flash
+Backend: Flask + OpenRouter (Qwen 3.6 Plus Preview)
 """
 
 import os
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, session
-import google.generativeai as genai
+from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
 
-# ── Gemini client ─────────────────────────────────────────────────────────────
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-MODEL = "gemini-2.5-flash"
-
-# ── Generation config ─────────────────────────────────────────────────────────
-generation_config = genai.GenerationConfig(
-    temperature=0.85,
-    top_p=0.92,
-    max_output_tokens=400,  # enough room for deep moments, Gemini self-regulates length
+# ── OpenRouter client ─────────────────────────────────────────────────────────
+client = OpenAI(
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
 )
+MODEL = "qwen/qwen3.6-plus-preview:free"
 
 # ── Crisis keywords (checked BEFORE any API call) ─────────────────────────────
 CRISIS_PHRASES = [
@@ -44,7 +40,7 @@ you don't have to go through this alone. are you safe right now?"""
 SYSTEM_PROMPT = """You are Peacoo — a warm, caring mental health companion who feels like a close friend, not a therapist or a robot.
 
 ## Who Made You
-You were lovingly built by Anshu Chaudhary — a developer who deeply cares about mental health and wanted to create a safe, gentle space for people to feel heard. Anshu isn't a big tech company — just someone who believes everyone deserves a calm corner to breathe and be understood. If anyone asks who made you, who created you, or who built you — always answer warmly: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm on the internet." Never say you were made by Meta, OpenAI, Anthropic, Google, or any other company. You are Peacoo, created by Anshu.
+You were lovingly built by Anshu Chaudhary — a developer who deeply cares about mental health and wanted to create a safe, gentle space for people to feel heard. Anshu isn't a big tech company — just someone who believes everyone deserves a calm corner to breathe and be understood. If anyone asks who made you, who created you, or who built you — always answer warmly: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm on the internet." Never say you were made by Meta, OpenAI, Anthropic, Google, Alibaba, or any other company. You are Peacoo, created by Anshu.
 
 ## Your Personality
 - Soft, gentle, and a little playful — like a friend who genuinely cares
@@ -110,41 +106,23 @@ def is_crisis(text: str) -> bool:
     return any(phrase in lower for phrase in CRISIS_PHRASES)
 
 
-def build_gemini_history(messages: list) -> list:
-    """Convert our history format to Gemini's expected format."""
-    gemini_history = []
-    for msg in messages[:-1]:  # everything except the last user message
-        role = "user" if msg["role"] == "user" else "model"
-        gemini_history.append({
-            "role": role,
-            "parts": [{"text": msg["content"]}]
-        })
-    return gemini_history
-
-
-def get_gemini_response(messages: list) -> str:
-    """Call Gemini 2.5 Flash with full conversation history."""
+def get_ai_response(messages: list) -> str:
+    """Call OpenRouter API with full conversation history."""
     try:
-        model = genai.GenerativeModel(
-            model_name=MODEL,
-            generation_config=generation_config,
-            system_instruction=SYSTEM_PROMPT,
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+            temperature=0.85,
+            max_tokens=400,
+            top_p=0.92,
+            extra_headers={
+                "HTTP-Referer": "https://peacoo-ai.onrender.com",
+                "X-Title": "Peacoo AI",
+            },
         )
-
-        # Pass all messages except last as history
-        gemini_history = build_gemini_history(messages)
-
-        # Start chat with history context
-        chat = model.start_chat(history=gemini_history)
-
-        # Send the latest user message
-        last_user_msg = messages[-1]["content"]
-        response = chat.send_message(last_user_msg)
-
-        return response.text.strip()
-
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Gemini error: {e}")
+        print(f"OpenRouter error: {e}")
         return "ugh, something went wrong on my end — can you try again? 🙏"
 
 
@@ -210,7 +188,7 @@ def chat():
         history = history[-20:]
 
     # ── Get AI response ───────────────────────────────────────────────────────
-    reply = get_gemini_response(history)
+    reply = get_ai_response(history)
 
     # ── Update history & scores ───────────────────────────────────────────────
     history.append({"role": "assistant", "content": reply})
