@@ -13,7 +13,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
 
 # ── Gemini client ─────────────────────────────────────────────────────────────
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-MODEL = "gemini-2.5-flash-preview-04-17"
+MODEL = "gemini-2.5-flash"
 
 # ── Generation config ─────────────────────────────────────────────────────────
 generation_config = genai.GenerationConfig(
