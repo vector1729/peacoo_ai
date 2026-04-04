@@ -16,7 +16,7 @@ client = OpenAI(
     api_key=os.environ.get("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1",
 )
-MODEL = "qwen/qwen3.6-plus-preview:free"
+MODEL = "qwen/qwen3.6-plus:free"
 
 # ── Crisis keywords (checked BEFORE any API call) ─────────────────────────────
 CRISIS_PHRASES = [
