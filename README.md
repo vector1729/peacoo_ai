@@ -1,9 +1,8 @@
 # 🤖 Peacoo AI — Mental Wellness Companion
-
 > *A safe, judgment-free space to talk through whatever is on your mind.*
 
 ![Made with Python](https://img.shields.io/badge/Made%20with-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Powered by Groq](https://img.shields.io/badge/Powered%20by-Groq-00A67E?style=for-the-badge)
+![Powered by Gemini](https://img.shields.io/badge/Powered%20by-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)
 ![Flask](https://img.shields.io/badge/Backend-Flask-000000?style=for-the-badge&logo=flask)
 ![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F-red?style=for-the-badge)
 
@@ -15,7 +14,6 @@
 ---
 
 ## 💚 What is Peacoo?
-
 Peacoo is an AI-powered mental wellness chatbot that talks like a warm, caring friend — not a robot or a therapist. It listens without judgment, responds with empathy, and gently guides you through difficult emotions.
 
 Built for people who just need someone (or something) to talk to.
@@ -23,7 +21,6 @@ Built for people who just need someone (or something) to talk to.
 ---
 
 ## ✨ Features
-
 - 🤖 **Friendly AI responses** — soft, informal, human-like tone
 - 💬 **Chat history** — your past sessions saved locally
 - 🫁 **Breathing exercise** — type `breathe` for guided box breathing
@@ -31,16 +28,16 @@ Built for people who just need someone (or something) to talk to.
 - 📓 **Journaling prompt** — type `journal` for a guided prompt
 - 💬 **Motivational quote** — type `quote`
 - 🚨 **Crisis detection** — instant helpline response, never goes to AI
+- 🌙 **Dark / Light mode** — toggle from settings
 - 📱 **Mobile friendly** — works on any device
 
 ---
 
 ## 🛠️ Tech Stack
-
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python + Flask |
-| AI Model | Llama 3.3 70B via Groq API |
+| AI Model | Gemini 2.5 Flash |
 | Frontend | HTML + CSS + Vanilla JS |
 | Hosting | Render.com |
 
@@ -59,18 +56,17 @@ cd peacoo_ai
 pip install -r requirements.txt
 ```
 
-**Step 3 — Get free Groq API key**
-
-Go to [console.groq.com](https://console.groq.com) → Sign up free → Create API Key
+**Step 3 — Get free Gemini API key**
+Go to [aistudio.google.com](https://aistudio.google.com) → Sign in → Get API Key → Create API Key
 
 **Step 4 — Set environment variables**
 ```bash
 # Mac/Linux
-export GROQ_API_KEY="gsk_your_key_here"
+export GEMINI_API_KEY="your_key_here"
 export SECRET_KEY="any-random-string"
 
 # Windows
-set GROQ_API_KEY=gsk_your_key_here
+set GEMINI_API_KEY=your_key_here
 set SECRET_KEY=any-random-string
 ```
 
@@ -78,18 +74,16 @@ set SECRET_KEY=any-random-string
 ```bash
 python app.py
 ```
-
 Open **http://localhost:5000** 🎉
 
 ---
 
 ## 🌐 Deploy on Render (Free)
-
 1. Push this repo to GitHub
 2. Go to [render.com](https://render.com) → New → Web Service
 3. Connect your GitHub repo
 4. Add environment variables:
-   - `GROQ_API_KEY` → your Groq key
+   - `GEMINI_API_KEY` → your Google AI Studio key
    - `SECRET_KEY` → any random string
 5. Start command: `gunicorn app:app`
 6. Deploy → get your public URL ✅
@@ -97,7 +91,6 @@ Open **http://localhost:5000** 🎉
 ---
 
 ## 🆘 Crisis Helplines
-
 If you or someone you know is in crisis:
 
 | | Helpline | Number |
@@ -109,16 +102,16 @@ If you or someone you know is in crisis:
 ---
 
 ## ⚠️ Disclaimer
-
 Peacoo is an AI companion and is **not** a substitute for professional mental health care. If you are experiencing a mental health crisis, please contact a licensed professional or the helplines listed above.
 
 ---
 
 ## 📁 Project Structure
+## 📁 Project Structure
 
 ```
 peacoo_ai/
-├── app.py              ← Flask backend + Groq API
+├── app.py              ← Flask backend + GEMINI API
 ├── templates/
 │   └── index.html      ← Chat UI
 ├── requirements.txt
