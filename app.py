@@ -13,10 +13,10 @@ app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
 
 # ── OpenRouter client ─────────────────────────────────────────────────────────
 client = OpenAI(
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1",
 )
-MODEL = "qwen/qwen3.6-plus:free"
+MODEL = "qwen/qwen3-32b"
 
 # ── Crisis keywords (checked BEFORE any API call) ─────────────────────────────
 CRISIS_PHRASES = [
