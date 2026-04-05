@@ -1,6 +1,6 @@
 """
 PEACOO AI - Mental Wellness Companion
-Backend: Flask + OpenRouter (Qwen 3.6 Plus Preview)
+Backend: Flask + Groq (Qwen3-32B)
 """
 
 import os
@@ -11,7 +11,7 @@ from openai import OpenAI
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
 
-# ── OpenRouter client ─────────────────────────────────────────────────────────
+# ── Groq client ───────────────────────────────────────────────────────────────
 client = OpenAI(
     api_key=os.environ.get("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1",
@@ -107,22 +107,19 @@ def is_crisis(text: str) -> bool:
 
 
 def get_ai_response(messages: list) -> str:
-    """Call OpenRouter API with full conversation history."""
+    """Call Groq API with full conversation history."""
     try:
         response = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-            temperature=0.85,
-            max_tokens=400,
-            top_p=0.92,
-            extra_headers={
-                "HTTP-Referer": "https://peacoo-ai.onrender.com",
-                "X-Title": "Peacoo AI",
-            },
+            temperature=0.7,
+            max_tokens=200,
+            top_p=0.9,
+            extra_body={"reasoning_effort": "none"},
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"OpenRouter error: {e}")
+        print(f"Groq error: {e}")
         return "ugh, something went wrong on my end — can you try again? 🙏"
 
 
