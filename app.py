@@ -592,8 +592,10 @@ def chat():
     # 🧠 BUILD OPTIMIZED HISTORY
     history = session.get("history", [])
     history.append({"role": "user", "content": user_text})
+    session["history"] = history          # ✅ FIX: save before get_optimized_history()
+    session.modified = True
 
-    optimized_history = get_optimized_history()
+    optimized_history = get_optimized_history()  # ✅ now sees latest message
 
     # 🤖 GET AI RESPONSE
     ai_response = get_ai_response(optimized_history)
