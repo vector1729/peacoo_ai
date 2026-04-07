@@ -242,6 +242,22 @@ header{
   letter-spacing:.05em;-webkit-text-fill-color:var(--text-dim);
 }
 
+/* IMPROVED — online presence indicator */
+.brand-status{
+  display:flex;align-items:center;gap:5px;
+  font-size:.68rem;color:var(--accent);
+  -webkit-text-fill-color:var(--accent);
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:status-pulse 2.5s ease-in-out infinite;
+}
+@keyframes status-pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.4;transform:scale(.8)}
+}
+
 .header-right{display:flex;align-items:center;gap:8px}
 .icon-btn{
   width:38px;height:38px;border-radius:10px;
@@ -259,17 +275,17 @@ main{
   overflow:hidden;position:relative;z-index:1;
 }
 
-/* ── Welcome screen ──────────────────────────────────────────────────── */
+/* ── Welcome screen — IMPROVED ───────────────────────────────────────── */
 #welcome-screen{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   padding:40px 24px;
-  animation:fade-up .6s ease;
+  animation:fade-up .7s ease;
 }
 #welcome-screen.hidden{display:none}
 
 .robot-avatar{
-  width:100px;height:100px;margin-bottom:28px;
+  width:96px;height:96px;margin-bottom:24px;
   position:relative;
 }
 .robot-body{
@@ -278,10 +294,10 @@ main{
   border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   box-shadow:
-    0 0 40px rgba(46,204,113,0.4),
-    0 0 80px rgba(46,204,113,0.15);
-  animation:robot-float 3s ease-in-out infinite;
-  font-size:52px;
+    0 0 40px rgba(46,204,113,0.35),
+    0 0 80px rgba(46,204,113,0.12);
+  animation:robot-float 4s ease-in-out infinite;
+  font-size:48px;
 }
 .robot-antenna{
   position:absolute;top:-12px;left:50%;transform:translateX(-50%);
@@ -292,24 +308,28 @@ main{
   width:8px;height:8px;border-radius:50%;
   background:var(--accent);
   box-shadow:0 0 8px var(--accent);
-  animation:antenna-blink 2s ease-in-out infinite;
+  animation:antenna-blink 2.5s ease-in-out infinite;
 }
 @keyframes robot-float{
   0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
+  50%{transform:translateY(-7px)}
 }
 @keyframes antenna-blink{
   0%,100%{opacity:1;box-shadow:0 0 8px var(--accent)}
-  50%{opacity:.3;box-shadow:none}
+  50%{opacity:.25;box-shadow:none}
 }
 
+/* IMPROVED — warmer welcome label */
 .welcome-label{
-  font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--accent);font-weight:500;margin-bottom:12px;
+  font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);font-weight:500;margin-bottom:10px;
+  opacity:.85;
 }
+
+/* IMPROVED — softer title, slightly smaller, less imposing */
 .welcome-title{
-  font-family:var(--display);font-size:2.4rem;font-weight:700;
-  text-align:center;line-height:1.2;margin-bottom:8px;
+  font-family:var(--display);font-size:2.1rem;font-weight:600;
+  text-align:center;line-height:1.25;margin-bottom:10px;
   color:var(--text);
 }
 .welcome-title span{
@@ -317,24 +337,53 @@ main{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   font-style:italic;
 }
+
+/* IMPROVED — more reassuring subtitle */
 .welcome-sub{
   color:var(--text-dim);font-size:.9rem;
-  text-align:center;max-width:380px;line-height:1.6;margin-bottom:32px;
+  text-align:center;max-width:360px;line-height:1.7;margin-bottom:10px;
 }
+
+/* ADDED — "type anything" micro-nudge between subtitle and chips */
+.welcome-nudge{
+  font-size:.75rem;color:var(--text-dim2);
+  text-align:center;margin-bottom:26px;
+  display:flex;align-items:center;gap:10px;
+  justify-content:center;
+}
+.welcome-nudge::before,
+.welcome-nudge::after{
+  content:'';width:32px;height:1px;
+  background:var(--border);display:block;
+  border-radius:99px;
+}
+
+/* IMPROVED — chips with fill-first, not auto-send */
 .quick-chips{
   display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
   max-width:480px;
 }
 .chip{
-  padding:9px 16px;border-radius:99px;
+  padding:9px 17px;border-radius:99px;
   background:var(--surface);border:1px solid var(--border);
-  color:var(--text);font-size:.83rem;cursor:pointer;
-  transition:all .2s;font-family:var(--sans);
+  color:var(--text-dim);font-size:.82rem;cursor:pointer;
+  transition:all .22s cubic-bezier(.2,.8,.3,1);
+  font-family:var(--sans);
+  position:relative;overflow:hidden;
 }
 .chip:hover{
+  background:rgba(46,204,113,0.10);
+  border-color:rgba(46,204,113,0.45);
+  color:var(--accent);transform:translateY(-2px);
+  box-shadow:0 4px 16px rgba(46,204,113,0.12);
+}
+/* ADDED — click ripple on chip */
+.chip:active{transform:translateY(0) scale(.97)}
+/* ADDED — chip fills input, shows it pre-filled */
+.chip.filling{
+  border-color:var(--accent);
   background:rgba(46,204,113,0.12);
-  border-color:rgba(46,204,113,0.5);
-  color:var(--accent);transform:translateY(-1px);
+  color:var(--accent);
 }
 
 /* ── Chat area ───────────────────────────────────────────────────────── */
@@ -355,10 +404,10 @@ main{
 /* ── Messages ────────────────────────────────────────────────────────── */
 .msg{
   display:flex;gap:12px;align-items:flex-end;
-  animation:msg-in .3s cubic-bezier(.2,.8,.3,1);
+  animation:msg-in .35s cubic-bezier(.2,.8,.3,1);
 }
-@keyframes msg-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes msg-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fade-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 .msg.user{flex-direction:row-reverse}
 
@@ -369,16 +418,17 @@ main{
 }
 .msg-avatar.bot{
   background:linear-gradient(135deg,#2ecc71,#1abc9c);
-  box-shadow:0 0 12px rgba(46,204,113,0.3);
+  box-shadow:0 0 12px rgba(46,204,113,0.28);
 }
 .msg-avatar.user{
   background:var(--surface2);border:1px solid var(--border);
   font-size:.8rem;color:var(--text-dim);font-weight:600;
 }
 
+/* IMPROVED — slightly more breathing room in bubbles */
 .bubble{
-  max-width:75%;padding:13px 17px;
-  line-height:1.7;font-size:.9rem;border-radius:18px;
+  max-width:75%;padding:14px 18px;
+  line-height:1.75;font-size:.9rem;border-radius:18px;
   transition:background var(--transition), border-color var(--transition);
 }
 .msg.bot .bubble{
@@ -393,10 +443,23 @@ main{
   color:var(--text);
   border-bottom-right-radius:5px;
 }
+
+/* IMPROVED — crisis bubble: calmer, more distinct, not alarming */
 .msg.crisis .bubble{
   background:var(--crisis-bg);
   border:1px solid var(--crisis-border);
   color:var(--crisis-text);
+  border-left:3px solid rgba(255,107,107,0.5);
+  padding-left:16px;
+}
+/* ADDED — soft "you're not alone" tag for crisis messages */
+.crisis-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.72rem;padding:3px 10px;border-radius:99px;
+  background:rgba(255,107,107,0.08);
+  border:1px solid rgba(255,107,107,0.2);
+  color:rgba(255,180,180,0.9);
+  margin-bottom:8px;
 }
 
 /* ── Typing ──────────────────────────────────────────────────────────── */
@@ -431,59 +494,93 @@ main{
 }
 @keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* Nudge */
+/* IMPROVED — nudge feels more grounded */
 .nudge{
   max-width:700px;margin:0 auto;width:100%;padding:0 20px;
 }
 .nudge-inner{
-  background:rgba(46,204,113,0.06);
-  border:1px solid rgba(46,204,113,0.2);
+  background:rgba(46,204,113,0.05);
+  border:1px solid rgba(46,204,113,0.18);
   border-radius:12px;padding:10px 16px;
-  font-size:.8rem;color:var(--accent);
+  font-size:.79rem;color:var(--accent);
   display:flex;gap:8px;align-items:flex-start;
+  line-height:1.5;
 }
 
-/* ── Input footer ────────────────────────────────────────────────────── */
+/* ── Input footer — IMPROVED ─────────────────────────────────────────── */
 footer{
-  padding:16px 20px 20px;
+  padding:14px 20px 18px;
   background:var(--footer-bg);
   border-top:1px solid var(--border);
   backdrop-filter:blur(20px);
   position:relative;z-index:10;flex-shrink:0;
   transition:background var(--transition);
 }
-.input-wrap{
+
+/* IMPROVED — character count + focus ring */
+.input-outer{
   max-width:700px;margin:0 auto;
+}
+.input-wrap{
   display:flex;gap:10px;align-items:flex-end;
   background:var(--input-bg);
   border:1px solid var(--border);
   border-radius:20px;padding:8px 8px 8px 18px;
-  transition:border-color .2s, background var(--transition);
+  transition:border-color .25s, box-shadow .25s, background var(--transition);
 }
-.input-wrap:focus-within{border-color:rgba(46,204,113,0.5)}
+.input-wrap:focus-within{
+  border-color:rgba(46,204,113,0.5);
+  box-shadow:0 0 0 3px rgba(46,204,113,0.08);
+}
 #msg-input{
   flex:1;background:none;border:none;outline:none;
   color:var(--text);font-family:var(--sans);font-size:.9rem;
-  resize:none;min-height:36px;max-height:120px;line-height:1.5;
+  resize:none;min-height:36px;max-height:120px;line-height:1.55;
   padding:6px 0;
 }
 #msg-input::placeholder{color:var(--text-dim2)}
+
+/* IMPROVED — send button with better states */
 #send-btn{
   width:40px;height:40px;border-radius:12px;flex-shrink:0;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   border:none;color:#0a1f0a;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:transform .15s,box-shadow .2s,opacity .2s;
-  box-shadow:0 0 16px rgba(46,204,113,0.3);
+  transition:transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .2s, opacity .2s, background .2s;
+  box-shadow:0 0 16px rgba(46,204,113,0.28);
+  position:relative;overflow:hidden;
 }
-#send-btn:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(46,204,113,0.45)}
-#send-btn:disabled{opacity:.4;transform:none;cursor:not-allowed}
-#send-btn svg{width:18px;height:18px}
+#send-btn:hover:not(:disabled){
+  transform:scale(1.07);
+  box-shadow:0 0 28px rgba(46,204,113,0.45);
+}
+#send-btn:active:not(:disabled){transform:scale(.95)}
+#send-btn:disabled{
+  opacity:.35;transform:none;cursor:not-allowed;
+  box-shadow:none;
+}
+/* ADDED — loading spinner inside send button */
+#send-btn.loading .btn-icon{display:none}
+#send-btn.loading .btn-spinner{display:flex}
+.btn-icon{display:flex;align-items:center;justify-content:center}
+.btn-spinner{
+  display:none;align-items:center;justify-content:center;
+}
+.spinner-ring{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(10,31,10,0.25);
+  border-top-color:#0a1f0a;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#send-btn svg{width:17px;height:17px}
 
+/* IMPROVED — footer hint more breathable */
 .footer-hint{
   max-width:700px;margin:8px auto 0;
-  font-size:.68rem;color:var(--text-dim2);
-  text-align:center;letter-spacing:.03em;
+  font-size:.67rem;color:var(--text-dim2);
+  text-align:center;letter-spacing:.02em;
+  line-height:1.6;
 }
 
 /* ── Info modal (shared base) ────────────────────────────────────────── */
@@ -502,10 +599,10 @@ footer{
   position:relative;z-index:1;
   background:var(--modal-bg);border:1px solid var(--border);
   border-radius:20px;padding:28px;max-width:400px;width:100%;
-  animation:modal-in .25s ease;
+  animation:modal-in .25s cubic-bezier(.2,.8,.3,1);
   transition:background var(--transition);
 }
-@keyframes modal-in{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
+@keyframes modal-in{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:none;opacity:1}}
 .modal-card h3{
   font-family:var(--display);font-size:1.1rem;
   color:var(--accent);margin-bottom:12px;
@@ -528,17 +625,14 @@ footer{
 }
 .modal-close:hover{background:var(--surface2);color:var(--text)}
 
-/* ── Settings Modal specific ─────────────────────────────────────────── */
-.settings-section{
-  margin-bottom:20px;
-}
+/* ── Settings Modal ─────────────────────────────────────────────────── */
+.settings-section{margin-bottom:20px}
 .settings-section:last-child{margin-bottom:0}
 .settings-label{
   font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
   color:var(--text-dim2);font-weight:600;margin-bottom:12px;
 }
 
-/* Theme toggle row */
 .theme-toggle-row{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--surface);border:1px solid var(--border);
@@ -549,7 +643,6 @@ footer{
 .theme-text{font-size:.88rem;color:var(--text);font-weight:500}
 .theme-subtext{font-size:.75rem;color:var(--text-dim);margin-top:1px}
 
-/* iOS-style toggle switch */
 .toggle-switch{
   position:relative;width:48px;height:26px;flex-shrink:0;
 }
@@ -577,7 +670,6 @@ footer{
   transform:translateX(22px);
 }
 
-/* Theme preview mini cards */
 .theme-previews{
   display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;
 }
@@ -599,9 +691,7 @@ footer{
 .preview-dark .preview-line{background:rgba(255,255,255,0.15)}
 .preview-light .preview-line{background:rgba(0,0,0,0.12)}
 .preview-line.short{width:50%}
-.preview-label{
-  font-size:.72rem;font-weight:600;margin-top:6px;
-}
+.preview-label{font-size:.72rem;font-weight:600;margin-top:6px;}
 .preview-dark .preview-label{color:rgba(232,245,232,0.6)}
 .preview-light .preview-label{color:rgba(26,51,32,0.6)}
 .preview-check{
@@ -613,23 +703,67 @@ footer{
   opacity:0;transition:opacity .2s;
 }
 .theme-preview-card.selected .preview-check{opacity:1}
+.settings-divider{height:1px;background:var(--border);margin:16px 0}
 
-/* Settings divider */
-.settings-divider{
-  height:1px;background:var(--border);margin:16px 0;
+/* ADDED — toast notification for actions */
+#toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(46,204,113,0.15);
+  border:1px solid rgba(46,204,113,0.3);
+  border-radius:99px;padding:8px 18px;
+  font-size:.8rem;color:var(--accent);
+  opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.2,.8,.3,1);
+  z-index:300;white-space:nowrap;
+  backdrop-filter:blur(12px);
+}
+#toast.show{
+  opacity:1;transform:translateX(-50%) translateY(0);
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────── */
+/* ADDED — scroll to bottom button */
+#scroll-btn{
+  position:fixed;
+  bottom:100px;right:20px;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text-dim);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+  opacity:0;pointer-events:none;
+  transition:all .25s;
+  z-index:50;
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+}
+#scroll-btn.visible{opacity:1;pointer-events:all}
+#scroll-btn:hover{background:rgba(46,204,113,0.15);border-color:rgba(46,204,113,0.4);color:var(--accent)}
+
+/* ── Responsive — IMPROVED ───────────────────────────────────────────── */
 @media(max-width:560px){
-  .welcome-title{font-size:1.8rem}
-  .bubble{max-width:88%;font-size:.87rem}
+  .welcome-title{font-size:1.75rem}
+  .bubble{max-width:90%;font-size:.875rem}
   .chat-inner{padding:0 12px}
-  footer{padding:12px 12px 16px}
+  footer{padding:10px 12px 14px}
   .theme-previews{grid-template-columns:1fr 1fr}
+  /* IMPROVED — on mobile, footer shrinks less aggressively */
+  .input-wrap{padding:7px 7px 7px 14px}
+  .footer-hint{display:none} /* clean up footer on small screens */
 }
+
+/* ADDED — smooth page-level transitions */
+#welcome-screen,#chat-screen{
+  transition:opacity .2s;
+}
+#welcome-screen.hiding{opacity:0}
 </style>
 </head>
 <body>
+
+<!-- ADDED — toast -->
+<div id="toast"></div>
+
+<!-- ADDED — scroll to bottom -->
+<button id="scroll-btn" onclick="scrollBottom()" title="Scroll to bottom">↓</button>
 
 <!-- ── Sidebar ────────────────────────────────────────────────────────────── -->
 <div id="overlay" onclick="closeSidebar()"></div>
@@ -659,8 +793,17 @@ footer{
     </button>
     <div class="header-brand">
       <div class="brand-avatar">🤖</div>
-      <div class="brand-name">Peacoo</div>
-      <div class="brand-tag">AI</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="brand-name">Peacoo</div>
+          <div class="brand-tag">AI</div>
+        </div>
+        <!-- ADDED — online status indicator -->
+        <div class="brand-status">
+          <div class="status-dot"></div>
+          here with you
+        </div>
+      </div>
     </div>
   </div>
   <div class="header-right">
@@ -670,7 +813,6 @@ footer{
         <path d="M3 3v5h5"/>
       </svg>
     </button>
-    <!-- Settings icon (was info icon) -->
     <button class="icon-btn" onclick="showSettings()" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/>
@@ -682,20 +824,24 @@ footer{
 
 <!-- ── Main ───────────────────────────────────────────────────────────────── -->
 <main>
+  <!-- IMPROVED — warmer, less formal welcome, chips fill input instead of auto-send -->
   <div id="welcome-screen">
     <div class="robot-avatar">
       <div class="robot-antenna"></div>
       <div class="robot-body">🤖</div>
     </div>
-    <div class="welcome-label">Mental Wellness Companion</div>
-    <h1 class="welcome-title">Where should we<br><span>begin today?</span></h1>
-    <p class="welcome-sub">A safe, judgment-free space to talk through whatever is on your mind.</p>
+    <div class="welcome-label">Your gentle companion</div>
+    <h1 class="welcome-title">How are you feeling<br><span>right now?</span></h1>
+    <p class="welcome-sub">This is a calm space — no pressure, no judgment. Say as little or as much as you'd like.</p>
+    <!-- ADDED — "type anything" nudge -->
+    <div class="welcome-nudge">or just type whatever's on your mind</div>
     <div class="quick-chips">
-      <button class="chip" onclick="quickSend('I feel anxious 😰')">I feel anxious 😰</button>
-      <button class="chip" onclick="quickSend('I need motivation 🌿')">I need motivation 🌿</button>
-      <button class="chip" onclick="quickSend('breathe')">Let's breathe 🫁</button>
-      <button class="chip" onclick="quickSend('I\'m feeling low')">I'm feeling low</button>
-      <button class="chip" onclick="quickSend('Exam stress 📚')">Exam stress 📚</button>
+      <!-- IMPROVED — chips now fill input, don't force-send -->
+      <button class="chip" onclick="quickFill('I feel anxious 😰')">I feel anxious 😰</button>
+      <button class="chip" onclick="quickFill('I need some motivation 🌿')">I need motivation 🌿</button>
+      <button class="chip" onclick="quickFill('Can we do a breathing exercise? 🫁')">Let's breathe 🫁</button>
+      <button class="chip" onclick="quickFill('I\'m feeling low today')">I'm feeling low</button>
+      <button class="chip" onclick="quickFill('I\'m stressed about exams 📚')">Exam stress 📚</button>
     </div>
   </div>
 
@@ -706,16 +852,24 @@ footer{
 
 <!-- ── Footer input ───────────────────────────────────────────────────────── -->
 <footer>
-  <div class="input-wrap">
-    <textarea id="msg-input" placeholder="Share what's on your mind…" rows="1"></textarea>
-    <button id="send-btn" onclick="sendMessage()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"/>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-    </button>
+  <div class="input-outer">
+    <div class="input-wrap">
+      <textarea id="msg-input" placeholder="Share what's on your mind…" rows="1"></textarea>
+      <button id="send-btn" onclick="sendMessage()" title="Send">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </span>
+        <!-- ADDED — loading spinner -->
+        <span class="btn-spinner">
+          <div class="spinner-ring"></div>
+        </span>
+      </button>
+    </div>
+    <p class="footer-hint">Peacoo is here with you &nbsp;·&nbsp; Not a substitute for professional care &nbsp;·&nbsp; Made with ❤️ by Anshu Chaudhary</p>
   </div>
-  <p class="footer-hint">• Peacoo is here with you • Not a substitute for professional care • Made with ❤️ by Anshu Chaudhary •</p>
 </footer>
 
 <!-- ── Settings Modal ─────────────────────────────────────────────────────── -->
@@ -725,10 +879,8 @@ footer{
     <button class="modal-close" onclick="hideSettings()">✕</button>
     <h3>⚙️ Settings</h3>
 
-    <!-- Appearance -->
     <div class="settings-section">
       <div class="settings-label">Appearance</div>
-
       <div class="theme-toggle-row">
         <div class="theme-toggle-info">
           <div class="theme-icon" id="theme-icon">🌙</div>
@@ -744,8 +896,6 @@ footer{
           </div>
         </label>
       </div>
-
-      <!-- Visual preview cards -->
       <div class="theme-previews">
         <div class="theme-preview-card preview-dark" id="preview-dark" onclick="setTheme('dark')">
           <div class="preview-check">✓</div>
@@ -772,7 +922,6 @@ footer{
 
     <div class="settings-divider"></div>
 
-    <!-- About -->
     <div class="settings-section">
       <div class="settings-label">About Peacoo</div>
       <p style="font-size:.85rem;color:var(--text-dim);line-height:1.7;margin-bottom:0">
@@ -802,12 +951,8 @@ function getCurrentTheme() {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('peacoo_theme', theme);
-
-  // Update toggle state
   const toggle = document.getElementById('theme-toggle');
   if (toggle) toggle.checked = (theme === 'light');
-
-  // Update label text
   const icon    = document.getElementById('theme-icon');
   const text    = document.getElementById('theme-text');
   const subtext = document.getElementById('theme-subtext');
@@ -820,23 +965,17 @@ function applyTheme(theme) {
     text.textContent    = 'Dark Mode';
     subtext.textContent = 'Easy on the eyes at night';
   }
-
-  // Update preview card selection
   document.getElementById('preview-dark').classList.toggle('selected',  theme === 'dark');
   document.getElementById('preview-light').classList.toggle('selected', theme === 'light');
 }
 
-function toggleTheme(isLight) {
-  setTheme(isLight ? 'light' : 'dark');
-}
-
+function toggleTheme(isLight) { setTheme(isLight ? 'light' : 'dark'); }
 function setTheme(theme) {
   applyTheme(theme);
-  // Sync toggle checkbox
   document.getElementById('theme-toggle').checked = (theme === 'light');
+  showToast(theme === 'light' ? '☀️ Light mode on' : '🌙 Dark mode on');
 }
 
-/* ── Apply saved theme immediately on load ── */
 applyTheme(getCurrentTheme());
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -844,6 +983,18 @@ applyTheme(getCurrentTheme());
  * ═══════════════════════════════════════════════════════════════════════ */
 function showSettings() { document.getElementById('settings-modal').classList.add('show') }
 function hideSettings() { document.getElementById('settings-modal').classList.remove('show') }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * TOAST — ADDED
+ * ═══════════════════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
  * STATE
@@ -854,7 +1005,7 @@ let isTyping = false;
 /* ═══════════════════════════════════════════════════════════════════════
  * SIDEBAR
  * ═══════════════════════════════════════════════════════════════════════ */
-function openSidebar()  {
+function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('overlay').classList.add('show');
   renderHistory();
@@ -865,7 +1016,7 @@ function closeSidebar() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * SESSION / HISTORY  (localStorage)
+ * SESSION / HISTORY
  * ═══════════════════════════════════════════════════════════════════════ */
 function getAllSessions() {
   try { return JSON.parse(localStorage.getItem('peacoo_sessions') || '[]') }
@@ -931,13 +1082,11 @@ function loadSession(id) {
   const session = getSession(id);
   if (!session) return;
   currentSessionId = id;
-
   fetch('/load_session', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ messages: session.messages })
   });
-
   showChatScreen();
   const inner = document.getElementById('chat-inner');
   inner.innerHTML = '';
@@ -954,11 +1103,13 @@ function loadSession(id) {
 function newSession() {
   closeSidebar();
   currentSessionId = 'session_' + Date.now();
+  localMessages = [];
   fetch('/reset', { method:'POST' });
-
   document.getElementById('chat-screen').classList.add('hidden');
   document.getElementById('welcome-screen').classList.remove('hidden');
   document.getElementById('chat-inner').innerHTML = '';
+  document.getElementById('msg-input').value = '';
+  document.getElementById('msg-input').style.height = 'auto';
   document.getElementById('msg-input').focus();
 }
 
@@ -968,13 +1119,23 @@ function showChatScreen() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * UI HELPERS
+ * SCROLL & SCROLL-TO-BOTTOM BUTTON — IMPROVED
  * ═══════════════════════════════════════════════════════════════════════ */
-function scrollBottom() {
+function scrollBottom(smooth=true) {
   const el = document.getElementById('chat-screen');
-  el.scrollTo({ top: el.scrollHeight, behavior:'smooth' });
+  el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
 }
 
+// ADDED — show scroll-to-bottom button when user scrolls up
+document.getElementById('chat-screen').addEventListener('scroll', function() {
+  const el = this;
+  const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  document.getElementById('scroll-btn').classList.toggle('visible', !nearBottom);
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * UI HELPERS
+ * ═══════════════════════════════════════════════════════════════════════ */
 function escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -1005,6 +1166,7 @@ function appendBotBubbleInstant(text) {
   document.getElementById('chat-inner').appendChild(div);
 }
 
+// IMPROVED — crisis bubbles get a soft "you're not alone" tag
 function typewriterBot(text, isCrisis=false) {
   return new Promise(resolve => {
     const div = document.createElement('div');
@@ -1013,31 +1175,50 @@ function typewriterBot(text, isCrisis=false) {
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
 
+    // ADDED — gentle crisis tag above text
+    if (isCrisis) {
+      const tag = document.createElement('div');
+      tag.className = 'crisis-tag';
+      tag.textContent = '🤍 You\'re not alone';
+      bubble.appendChild(tag);
+    }
+
+    const textNode = document.createElement('span');
     const cursor = document.createElement('span');
     cursor.className = 'typing-cursor';
+    textNode.appendChild(cursor);
+    bubble.appendChild(textNode);
 
     div.innerHTML = `<div class="msg-avatar bot">🤖</div>`;
     div.appendChild(bubble);
-    bubble.appendChild(cursor);
-
     document.getElementById('chat-inner').appendChild(div);
     scrollBottom();
 
-    const baseDelay = text.length > 200 ? 12 : 22;
+    const baseDelay = text.length > 200 ? 11 : 20;
     let i = 0;
 
     function typeChar() {
       if (i < text.length) {
-        bubble.insertBefore(document.createTextNode(text[i]), cursor);
+        textNode.insertBefore(document.createTextNode(text[i]), cursor);
         i++;
-        let delay = baseDelay + Math.random() * 8;
-        if ('.!?'.includes(text[i-1])) delay += 180;
-        else if (',;:'.includes(text[i-1])) delay += 80;
+        let d = baseDelay + Math.random() * 7;
+        if ('.!?'.includes(text[i-1])) d += 160;
+        else if (',;:'.includes(text[i-1])) d += 70;
         scrollBottom();
-        setTimeout(typeChar, delay);
+        setTimeout(typeChar, d);
       } else {
         cursor.remove();
-        bubble.innerHTML = formatText(text);
+        // Re-render with full formatting
+        if (isCrisis) {
+          const tag = bubble.querySelector('.crisis-tag');
+          bubble.innerHTML = '';
+          if (tag) bubble.appendChild(tag);
+          const formatted = document.createElement('span');
+          formatted.innerHTML = formatText(text);
+          bubble.appendChild(formatted);
+        } else {
+          bubble.innerHTML = formatText(text);
+        }
         scrollBottom();
         resolve();
       }
@@ -1066,9 +1247,15 @@ function hideTypingIndicator() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * SEND MESSAGE
+ * SEND MESSAGE — IMPROVED send button states
  * ═══════════════════════════════════════════════════════════════════════ */
 let localMessages = [];
+
+function setSendLoading(loading) {
+  const btn = document.getElementById('send-btn');
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
 
 async function sendMessage() {
   const input = document.getElementById('msg-input');
@@ -1080,13 +1267,13 @@ async function sendMessage() {
 
   input.value = '';
   input.style.height = 'auto';
-  document.getElementById('send-btn').disabled = true;
   isTyping = true;
+  setSendLoading(true);
 
   appendUserBubble(text);
   localMessages.push({ role:'user', content:text });
 
-  await delay(300);
+  await delay(280);
   showTypingIndicator();
 
   try {
@@ -1097,7 +1284,7 @@ async function sendMessage() {
     });
     const data = await res.json();
 
-    const readDelay = Math.min(600 + text.length * 8, 1800);
+    const readDelay = Math.min(500 + text.length * 7, 1600);
     await delay(readDelay);
     hideTypingIndicator();
 
@@ -1116,32 +1303,60 @@ async function sendMessage() {
 
   } catch(err) {
     hideTypingIndicator();
-    await typewriterBot("I'm having trouble connecting right now. Please try again in a moment.");
+    await typewriterBot("I'm having a little trouble connecting right now. Please try again in a moment — I'm here.");
   }
 
   isTyping = false;
-  document.getElementById('send-btn').disabled = false;
+  setSendLoading(false);
   input.focus();
 }
 
-function quickSend(text) {
-  document.getElementById('msg-input').value = text;
-  sendMessage();
+// IMPROVED — chips fill the input, give user control before sending
+function quickFill(text) {
+  const input = document.getElementById('msg-input');
+  input.value = text;
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  input.focus();
+  // Move caret to end
+  input.selectionStart = input.selectionEnd = text.length;
+  // Visual feedback on chip
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('filling'));
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c => {
+    if (c.getAttribute('onclick') && c.getAttribute('onclick').includes(text.replace(/'/g,"\\'").substring(0,15))) {
+      c.classList.add('filling');
+      setTimeout(() => c.classList.remove('filling'), 1200);
+    }
+  });
 }
+
+// Kept for backwards compat if needed anywhere
+function quickSend(text) { quickFill(text); }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * INPUT HANDLERS
+ * INPUT HANDLERS — IMPROVED mobile handling
  * ═══════════════════════════════════════════════════════════════════════ */
 const msgInput = document.getElementById('msg-input');
+
 msgInput.addEventListener('input', () => {
   msgInput.style.height = 'auto';
   msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
 });
+
 msgInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
+
+// ADDED — on mobile, blur input when scrolling chat (prevents keyboard blocking)
+document.getElementById('chat-screen').addEventListener('touchstart', () => {
+  if (document.activeElement === msgInput) msgInput.blur();
+}, { passive: true });
 
 /* ── Init ────────────────────────────────────────────────────────────── */
 msgInput.focus();
