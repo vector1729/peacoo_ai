@@ -8,10 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── Reset ───────────────────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* ── Theme Variables ─────────────────────────────────────────────────── */
 :root {
   --accent:      #2ecc71;
   --accent2:     #27ae60;
@@ -24,7 +22,6 @@
   --transition:  0.25s ease;
 }
 
-/* DARK THEME (default) */
 [data-theme="dark"] {
   --bg:          #0a1f0a;
   --bg2:         #0d2b0d;
@@ -53,7 +50,6 @@
   --crisis-text: #ffaaaa;
 }
 
-/* LIGHT THEME */
 [data-theme="light"] {
   --bg:          #f0faf0;
   --bg2:         #e8f5e8;
@@ -91,7 +87,6 @@ body{
   transition:background var(--transition), color var(--transition);
 }
 
-/* ── Animated background ─────────────────────────────────────────────── */
 body::before{
   content:'';
   position:fixed;inset:0;
@@ -102,7 +97,6 @@ body::before{
   transition:background var(--transition);
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────── */
 #sidebar{
   position:fixed;top:0;left:0;bottom:0;
   width:var(--sidebar-w);
@@ -189,7 +183,6 @@ body::before{
 }
 .btn-new-session:hover{opacity:.9;transform:translateY(-1px)}
 
-/* ── Overlay ─────────────────────────────────────────────────────────── */
 #overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.5);
   z-index:99;opacity:0;pointer-events:none;
@@ -197,7 +190,6 @@ body::before{
 }
 #overlay.show{opacity:1;pointer-events:all}
 
-/* ── Header ──────────────────────────────────────────────────────────── */
 header{
   height:var(--header-h);
   display:flex;align-items:center;justify-content:space-between;
@@ -242,7 +234,6 @@ header{
   letter-spacing:.05em;-webkit-text-fill-color:var(--text-dim);
 }
 
-/* IMPROVED — online presence indicator */
 .brand-status{
   display:flex;align-items:center;gap:5px;
   font-size:.68rem;color:var(--accent);
@@ -269,13 +260,11 @@ header{
 .icon-btn:hover{background:var(--surface2);color:var(--text);border-color:rgba(46,204,113,0.4)}
 .icon-btn svg{width:16px;height:16px}
 
-/* ── Main area ───────────────────────────────────────────────────────── */
 main{
   flex:1;display:flex;flex-direction:column;
   overflow:hidden;position:relative;z-index:1;
 }
 
-/* ── Welcome screen — IMPROVED ───────────────────────────────────────── */
 #welcome-screen{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
@@ -319,14 +308,12 @@ main{
   50%{opacity:.25;box-shadow:none}
 }
 
-/* IMPROVED — warmer welcome label */
 .welcome-label{
   font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;
   color:var(--accent);font-weight:500;margin-bottom:10px;
   opacity:.85;
 }
 
-/* IMPROVED — softer title, slightly smaller, less imposing */
 .welcome-title{
   font-family:var(--display);font-size:2.1rem;font-weight:600;
   text-align:center;line-height:1.25;margin-bottom:10px;
@@ -338,13 +325,11 @@ main{
   font-style:italic;
 }
 
-/* IMPROVED — more reassuring subtitle */
 .welcome-sub{
   color:var(--text-dim);font-size:.9rem;
   text-align:center;max-width:360px;line-height:1.7;margin-bottom:10px;
 }
 
-/* ADDED — "type anything" micro-nudge between subtitle and chips */
 .welcome-nudge{
   font-size:.75rem;color:var(--text-dim2);
   text-align:center;margin-bottom:26px;
@@ -358,7 +343,6 @@ main{
   border-radius:99px;
 }
 
-/* IMPROVED — chips with fill-first, not auto-send */
 .quick-chips{
   display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
   max-width:480px;
@@ -377,16 +361,13 @@ main{
   color:var(--accent);transform:translateY(-2px);
   box-shadow:0 4px 16px rgba(46,204,113,0.12);
 }
-/* ADDED — click ripple on chip */
 .chip:active{transform:translateY(0) scale(.97)}
-/* ADDED — chip fills input, shows it pre-filled */
 .chip.filling{
   border-color:var(--accent);
   background:rgba(46,204,113,0.12);
   color:var(--accent);
 }
 
-/* ── Chat area ───────────────────────────────────────────────────────── */
 #chat-screen{
   flex:1;overflow-y:auto;padding:24px 0;
   scroll-behavior:smooth;
@@ -401,7 +382,6 @@ main{
   display:flex;flex-direction:column;gap:16px;
 }
 
-/* ── Messages ────────────────────────────────────────────────────────── */
 .msg{
   display:flex;gap:12px;align-items:flex-end;
   animation:msg-in .35s cubic-bezier(.2,.8,.3,1);
@@ -425,11 +405,19 @@ main{
   font-size:.8rem;color:var(--text-dim);font-weight:600;
 }
 
-/* IMPROVED — slightly more breathing room in bubbles */
+/* ── FIXED: bubble now uses white-space:pre-wrap so \n renders
+   correctly character-by-character during typing, with no layout
+   jump at the end. word-break prevents horizontal overflow. ── */
 .bubble{
-  max-width:75%;padding:14px 18px;
-  line-height:1.75;font-size:.9rem;border-radius:18px;
+  max-width:75%;
+  padding:14px 18px;
+  line-height:1.75;
+  font-size:.9rem;
+  border-radius:18px;
   transition:background var(--transition), border-color var(--transition);
+  white-space:pre-wrap;   /* FIXED: renders newlines during typing */
+  word-break:break-word;  /* FIXED: prevents overflow on long words */
+  overflow-wrap:break-word;
 }
 .msg.bot .bubble{
   background:var(--bubble-bot);
@@ -444,7 +432,6 @@ main{
   border-bottom-right-radius:5px;
 }
 
-/* IMPROVED — crisis bubble: calmer, more distinct, not alarming */
 .msg.crisis .bubble{
   background:var(--crisis-bg);
   border:1px solid var(--crisis-border);
@@ -452,17 +439,21 @@ main{
   border-left:3px solid rgba(255,107,107,0.5);
   padding-left:16px;
 }
-/* ADDED — soft "you're not alone" tag for crisis messages */
 .crisis-tag{
-  display:inline-flex;align-items:center;gap:5px;
+  display:block;
   font-size:.72rem;padding:3px 10px;border-radius:99px;
   background:rgba(255,107,107,0.08);
   border:1px solid rgba(255,107,107,0.2);
   color:rgba(255,180,180,0.9);
   margin-bottom:8px;
+  width:fit-content;
 }
 
-/* ── Typing ──────────────────────────────────────────────────────────── */
+/* FIXED: strong tags inside bubbles inherit correctly with pre-wrap */
+.bubble strong{
+  font-weight:600;
+}
+
 .typing-wrap{
   display:flex;gap:12px;align-items:flex-end;
   animation:msg-in .3s ease;
@@ -486,15 +477,18 @@ main{
   40%{transform:translateY(-6px);opacity:1}
 }
 
+/* FIXED: cursor is inline-block with no extra spacing */
 .typing-cursor{
-  display:inline-block;width:2px;height:1em;
-  background:var(--accent);margin-left:2px;
+  display:inline-block;
+  width:2px;height:1em;
+  background:var(--accent);
+  margin-left:1px;
   animation:cursor-blink .7s ease-in-out infinite;
-  vertical-align:text-bottom;border-radius:1px;
+  vertical-align:text-bottom;
+  border-radius:1px;
 }
 @keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* IMPROVED — nudge feels more grounded */
 .nudge{
   max-width:700px;margin:0 auto;width:100%;padding:0 20px;
 }
@@ -507,7 +501,6 @@ main{
   line-height:1.5;
 }
 
-/* ── Input footer — IMPROVED ─────────────────────────────────────────── */
 footer{
   padding:14px 20px 18px;
   background:var(--footer-bg);
@@ -517,7 +510,6 @@ footer{
   transition:background var(--transition);
 }
 
-/* IMPROVED — character count + focus ring */
 .input-outer{
   max-width:700px;margin:0 auto;
 }
@@ -540,7 +532,6 @@ footer{
 }
 #msg-input::placeholder{color:var(--text-dim2)}
 
-/* IMPROVED — send button with better states */
 #send-btn{
   width:40px;height:40px;border-radius:12px;flex-shrink:0;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
@@ -559,7 +550,6 @@ footer{
   opacity:.35;transform:none;cursor:not-allowed;
   box-shadow:none;
 }
-/* ADDED — loading spinner inside send button */
 #send-btn.loading .btn-icon{display:none}
 #send-btn.loading .btn-spinner{display:flex}
 .btn-icon{display:flex;align-items:center;justify-content:center}
@@ -575,7 +565,6 @@ footer{
 @keyframes spin{to{transform:rotate(360deg)}}
 #send-btn svg{width:17px;height:17px}
 
-/* IMPROVED — footer hint more breathable */
 .footer-hint{
   max-width:700px;margin:8px auto 0;
   font-size:.67rem;color:var(--text-dim2);
@@ -583,7 +572,6 @@ footer{
   line-height:1.6;
 }
 
-/* ── Info modal (shared base) ────────────────────────────────────────── */
 .modal-overlay{
   position:fixed;inset:0;z-index:200;
   display:flex;align-items:center;justify-content:center;
@@ -625,7 +613,6 @@ footer{
 }
 .modal-close:hover{background:var(--surface2);color:var(--text)}
 
-/* ── Settings Modal ─────────────────────────────────────────────────── */
 .settings-section{margin-bottom:20px}
 .settings-section:last-child{margin-bottom:0}
 .settings-label{
@@ -705,7 +692,6 @@ footer{
 .theme-preview-card.selected .preview-check{opacity:1}
 .settings-divider{height:1px;background:var(--border);margin:16px 0}
 
-/* ADDED — toast notification for actions */
 #toast{
   position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(16px);
   background:rgba(46,204,113,0.15);
@@ -721,7 +707,6 @@ footer{
   opacity:1;transform:translateX(-50%) translateY(0);
 }
 
-/* ADDED — scroll to bottom button */
 #scroll-btn{
   position:fixed;
   bottom:100px;right:20px;
@@ -738,19 +723,16 @@ footer{
 #scroll-btn.visible{opacity:1;pointer-events:all}
 #scroll-btn:hover{background:rgba(46,204,113,0.15);border-color:rgba(46,204,113,0.4);color:var(--accent)}
 
-/* ── Responsive — IMPROVED ───────────────────────────────────────────── */
 @media(max-width:560px){
   .welcome-title{font-size:1.75rem}
   .bubble{max-width:90%;font-size:.875rem}
   .chat-inner{padding:0 12px}
   footer{padding:10px 12px 14px}
   .theme-previews{grid-template-columns:1fr 1fr}
-  /* IMPROVED — on mobile, footer shrinks less aggressively */
   .input-wrap{padding:7px 7px 7px 14px}
-  .footer-hint{display:none} /* clean up footer on small screens */
+  .footer-hint{display:none}
 }
 
-/* ADDED — smooth page-level transitions */
 #welcome-screen,#chat-screen{
   transition:opacity .2s;
 }
@@ -759,13 +741,9 @@ footer{
 </head>
 <body>
 
-<!-- ADDED — toast -->
 <div id="toast"></div>
-
-<!-- ADDED — scroll to bottom -->
 <button id="scroll-btn" onclick="scrollBottom()" title="Scroll to bottom">↓</button>
 
-<!-- ── Sidebar ────────────────────────────────────────────────────────────── -->
 <div id="overlay" onclick="closeSidebar()"></div>
 <div id="sidebar">
   <div class="sidebar-header">
@@ -783,7 +761,6 @@ footer{
   </div>
 </div>
 
-<!-- ── Header ─────────────────────────────────────────────────────────────── -->
 <header>
   <div class="header-left">
     <button class="btn-menu" onclick="openSidebar()" title="Chat History">
@@ -798,7 +775,6 @@ footer{
           <div class="brand-name">Peacoo</div>
           <div class="brand-tag">AI</div>
         </div>
-        <!-- ADDED — online status indicator -->
         <div class="brand-status">
           <div class="status-dot"></div>
           here with you
@@ -822,9 +798,7 @@ footer{
   </div>
 </header>
 
-<!-- ── Main ───────────────────────────────────────────────────────────────── -->
 <main>
-  <!-- IMPROVED — warmer, less formal welcome, chips fill input instead of auto-send -->
   <div id="welcome-screen">
     <div class="robot-avatar">
       <div class="robot-antenna"></div>
@@ -833,10 +807,8 @@ footer{
     <div class="welcome-label">Your gentle companion</div>
     <h1 class="welcome-title">How are you feeling<br><span>right now?</span></h1>
     <p class="welcome-sub">This is a calm space — no pressure, no judgment. Say as little or as much as you'd like.</p>
-    <!-- ADDED — "type anything" nudge -->
     <div class="welcome-nudge">or just type whatever's on your mind</div>
     <div class="quick-chips">
-      <!-- IMPROVED — chips now fill input, don't force-send -->
       <button class="chip" onclick="quickFill('I feel anxious 😰')">I feel anxious 😰</button>
       <button class="chip" onclick="quickFill('I need some motivation 🌿')">I need motivation 🌿</button>
       <button class="chip" onclick="quickFill('Can we do a breathing exercise? 🫁')">Let's breathe 🫁</button>
@@ -850,7 +822,6 @@ footer{
   </div>
 </main>
 
-<!-- ── Footer input ───────────────────────────────────────────────────────── -->
 <footer>
   <div class="input-outer">
     <div class="input-wrap">
@@ -862,7 +833,6 @@ footer{
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
         </span>
-        <!-- ADDED — loading spinner -->
         <span class="btn-spinner">
           <div class="spinner-ring"></div>
         </span>
@@ -872,7 +842,6 @@ footer{
   </div>
 </footer>
 
-<!-- ── Settings Modal ─────────────────────────────────────────────────────── -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-bg" onclick="hideSettings()"></div>
   <div class="modal-card">
@@ -941,426 +910,508 @@ footer{
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════════
- * THEME MANAGEMENT
- * ═══════════════════════════════════════════════════════════════════════ */
-function getCurrentTheme() {
-  return localStorage.getItem('peacoo_theme') || 'dark';
-}
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('peacoo_theme', theme);
-  const toggle = document.getElementById('theme-toggle');
-  if (toggle) toggle.checked = (theme === 'light');
-  const icon    = document.getElementById('theme-icon');
-  const text    = document.getElementById('theme-text');
-  const subtext = document.getElementById('theme-subtext');
-  if (theme === 'light') {
-    icon.textContent    = '☀️';
-    text.textContent    = 'Light Mode';
-    subtext.textContent = 'Bright and easy to read';
-  } else {
-    icon.textContent    = '🌙';
-    text.textContent    = 'Dark Mode';
-    subtext.textContent = 'Easy on the eyes at night';
+/* ═══════════════════════════════════════════════════════════════
+ * THEME
+ * ═══════════════════════════════════════════════════════════════ */
+function getCurrentTheme(){return localStorage.getItem('peacoo_theme')||'dark'}
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  localStorage.setItem('peacoo_theme',theme);
+  var toggle=document.getElementById('theme-toggle');
+  if(toggle)toggle.checked=(theme==='light');
+  var icon=document.getElementById('theme-icon');
+  var text=document.getElementById('theme-text');
+  var subtext=document.getElementById('theme-subtext');
+  if(theme==='light'){
+    icon.textContent='☀️';text.textContent='Light Mode';
+    subtext.textContent='Bright and easy to read';
+  }else{
+    icon.textContent='🌙';text.textContent='Dark Mode';
+    subtext.textContent='Easy on the eyes at night';
   }
-  document.getElementById('preview-dark').classList.toggle('selected',  theme === 'dark');
-  document.getElementById('preview-light').classList.toggle('selected', theme === 'light');
+  document.getElementById('preview-dark').classList.toggle('selected',theme==='dark');
+  document.getElementById('preview-light').classList.toggle('selected',theme==='light');
 }
-
-function toggleTheme(isLight) { setTheme(isLight ? 'light' : 'dark'); }
-function setTheme(theme) {
+function toggleTheme(isLight){setTheme(isLight?'light':'dark')}
+function setTheme(theme){
   applyTheme(theme);
-  document.getElementById('theme-toggle').checked = (theme === 'light');
-  showToast(theme === 'light' ? '☀️ Light mode on' : '🌙 Dark mode on');
+  document.getElementById('theme-toggle').checked=(theme==='light');
+  showToast(theme==='light'?'☀️ Light mode on':'🌙 Dark mode on');
 }
-
 applyTheme(getCurrentTheme());
 
-/* ═══════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
  * SETTINGS MODAL
- * ═══════════════════════════════════════════════════════════════════════ */
-function showSettings() { document.getElementById('settings-modal').classList.add('show') }
-function hideSettings() { document.getElementById('settings-modal').classList.remove('show') }
+ * ═══════════════════════════════════════════════════════════════ */
+function showSettings(){document.getElementById('settings-modal').classList.add('show')}
+function hideSettings(){document.getElementById('settings-modal').classList.remove('show')}
 
-/* ═══════════════════════════════════════════════════════════════════════
- * TOAST — ADDED
- * ═══════════════════════════════════════════════════════════════════════ */
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+/* ═══════════════════════════════════════════════════════════════
+ * TOAST
+ * ═══════════════════════════════════════════════════════════════ */
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  toastTimer=setTimeout(function(){t.classList.remove('show')},2200);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
  * STATE
- * ═══════════════════════════════════════════════════════════════════════ */
-let currentSessionId = null;
-let isTyping = false;
+ * ═══════════════════════════════════════════════════════════════ */
+var currentSessionId=null;
+var isTyping=false;
+var localMessages=[];
 
-/* ═══════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
  * SIDEBAR
- * ═══════════════════════════════════════════════════════════════════════ */
-function openSidebar() {
+ * ═══════════════════════════════════════════════════════════════ */
+function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('overlay').classList.add('show');
   renderHistory();
 }
-function closeSidebar() {
+function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
  * SESSION / HISTORY
- * ═══════════════════════════════════════════════════════════════════════ */
-function getAllSessions() {
-  try { return JSON.parse(localStorage.getItem('peacoo_sessions') || '[]') }
-  catch { return [] }
+ * ═══════════════════════════════════════════════════════════════ */
+function getAllSessions(){
+  try{return JSON.parse(localStorage.getItem('peacoo_sessions')||'[]')}
+  catch(e){return[]}
 }
-function saveSessions(sessions) {
-  localStorage.setItem('peacoo_sessions', JSON.stringify(sessions));
+function saveSessions(sessions){
+  localStorage.setItem('peacoo_sessions',JSON.stringify(sessions));
 }
-function getSession(id) {
-  return getAllSessions().find(s => s.id === id) || null;
+function getSession(id){
+  return getAllSessions().find(function(s){return s.id===id})||null;
 }
-function saveCurrentSession(messages) {
-  if (!currentSessionId) return;
-  let sessions = getAllSessions();
-  const idx = sessions.findIndex(s => s.id === currentSessionId);
-  const preview = messages.find(m => m.role === 'user')?.content || 'New chat';
-  const entry = {
-    id: currentSessionId,
-    date: new Date().toISOString(),
-    preview: preview.slice(0, 60),
-    messages
-  };
-  if (idx >= 0) sessions[idx] = entry;
-  else sessions.unshift(entry);
-  sessions = sessions.slice(0, 30);
+function saveCurrentSession(messages){
+  if(!currentSessionId)return;
+  var sessions=getAllSessions();
+  var idx=sessions.findIndex(function(s){return s.id===currentSessionId});
+  var userMsg=messages.find(function(m){return m.role==='user'});
+  var preview=userMsg?userMsg.content:'New chat';
+  var entry={id:currentSessionId,date:new Date().toISOString(),preview:preview.slice(0,60),messages:messages};
+  if(idx>=0)sessions[idx]=entry;else sessions.unshift(entry);
+  sessions=sessions.slice(0,30);
   saveSessions(sessions);
 }
-function deleteSession(id, e) {
+function deleteSession(id,e){
   e.stopPropagation();
-  let sessions = getAllSessions().filter(s => s.id !== id);
+  var sessions=getAllSessions().filter(function(s){return s.id!==id});
   saveSessions(sessions);
-  if (id === currentSessionId) newSession();
-  else renderHistory();
+  if(id===currentSessionId)newSession();else renderHistory();
 }
-
-function renderHistory() {
-  const list = document.getElementById('history-list');
-  const sessions = getAllSessions();
-  if (!sessions.length) {
-    list.innerHTML = `<div class="history-empty"><div class="icon">🕊️</div>No previous sessions yet.<br>Start a conversation!</div>`;
+function renderHistory(){
+  var list=document.getElementById('history-list');
+  var sessions=getAllSessions();
+  if(!sessions.length){
+    list.innerHTML='<div class="history-empty"><div class="icon">🕊️</div>No previous sessions yet.<br>Start a conversation!</div>';
     return;
   }
-  list.innerHTML = sessions.map(s => {
-    const d = new Date(s.date);
-    const dateStr = d.toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    const active = s.id === currentSessionId ? ' active' : '';
-    return `
-      <div class="history-session${active}" onclick="loadSession('${s.id}')">
-        <div class="session-header">
-          <div class="session-dot"></div>
-          <div class="session-info">
-            <div class="session-date">${dateStr}</div>
-            <div class="session-preview">${escHtml(s.preview)}</div>
-          </div>
-          <button class="session-del" onclick="deleteSession('${s.id}', event)" title="Delete">🗑</button>
-        </div>
-      </div>`;
+  list.innerHTML=sessions.map(function(s){
+    var d=new Date(s.date);
+    var dateStr=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    var active=s.id===currentSessionId?' active':'';
+    return '<div class="history-session'+active+'" onclick="loadSession(\''+s.id+'\')">'
+      +'<div class="session-header">'
+      +'<div class="session-dot"></div>'
+      +'<div class="session-info">'
+      +'<div class="session-date">'+dateStr+'</div>'
+      +'<div class="session-preview">'+escHtml(s.preview)+'</div>'
+      +'</div>'
+      +'<button class="session-del" onclick="deleteSession(\''+s.id+'\',event)" title="Delete">🗑</button>'
+      +'</div></div>';
   }).join('');
 }
-
-function loadSession(id) {
+function loadSession(id){
   closeSidebar();
-  const session = getSession(id);
-  if (!session) return;
-  currentSessionId = id;
-  fetch('/load_session', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ messages: session.messages })
-  });
+  var session=getSession(id);
+  if(!session)return;
+  currentSessionId=id;
+  localMessages=session.messages.slice();
+  fetch('/load_session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:session.messages})});
   showChatScreen();
-  const inner = document.getElementById('chat-inner');
-  inner.innerHTML = '';
-  session.messages.forEach(m => {
-    if (m.role === 'user') appendUserBubble(m.content);
+  var inner=document.getElementById('chat-inner');
+  inner.innerHTML='';
+  session.messages.forEach(function(m){
+    if(m.role==='user')appendUserBubble(m.content);
     else appendBotBubbleInstant(m.content);
   });
-  scrollBottom();
+  scrollBottom(false);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
  * SESSION CONTROL
- * ═══════════════════════════════════════════════════════════════════════ */
-function newSession() {
+ * ═══════════════════════════════════════════════════════════════ */
+function newSession(){
   closeSidebar();
-  currentSessionId = 'session_' + Date.now();
-  localMessages = [];
-  fetch('/reset', { method:'POST' });
+  currentSessionId='session_'+Date.now();
+  localMessages=[];
+  fetch('/reset',{method:'POST'});
   document.getElementById('chat-screen').classList.add('hidden');
   document.getElementById('welcome-screen').classList.remove('hidden');
-  document.getElementById('chat-inner').innerHTML = '';
-  document.getElementById('msg-input').value = '';
-  document.getElementById('msg-input').style.height = 'auto';
-  document.getElementById('msg-input').focus();
+  document.getElementById('chat-inner').innerHTML='';
+  var inp=document.getElementById('msg-input');
+  inp.value='';inp.style.height='auto';inp.focus();
 }
-
-function showChatScreen() {
+function showChatScreen(){
   document.getElementById('welcome-screen').classList.add('hidden');
   document.getElementById('chat-screen').classList.remove('hidden');
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
- * SCROLL & SCROLL-TO-BOTTOM BUTTON — IMPROVED
- * ═══════════════════════════════════════════════════════════════════════ */
-function scrollBottom(smooth=true) {
-  const el = document.getElementById('chat-screen');
-  el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+/* ═══════════════════════════════════════════════════════════════
+ * SCROLL
+ * ═══════════════════════════════════════════════════════════════ */
+function scrollBottom(smooth){
+  if(smooth===undefined)smooth=true;
+  var el=document.getElementById('chat-screen');
+  el.scrollTo({top:el.scrollHeight,behavior:smooth?'smooth':'auto'});
 }
-
-// ADDED — show scroll-to-bottom button when user scrolls up
-document.getElementById('chat-screen').addEventListener('scroll', function() {
-  const el = this;
-  const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-  document.getElementById('scroll-btn').classList.toggle('visible', !nearBottom);
+document.getElementById('chat-screen').addEventListener('scroll',function(){
+  var el=this;
+  var nearBottom=el.scrollHeight-el.scrollTop-el.clientHeight<120;
+  document.getElementById('scroll-btn').classList.toggle('visible',!nearBottom);
 });
 
-/* ═══════════════════════════════════════════════════════════════════════
- * UI HELPERS
- * ═══════════════════════════════════════════════════════════════════════ */
-function escHtml(s) {
+/* ═══════════════════════════════════════════════════════════════
+ * HELPERS
+ * ═══════════════════════════════════════════════════════════════ */
+function escHtml(s){
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function formatText(text) {
-  return escHtml(text)
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n/g,'<br>');
+/*
+ * FIXED: normalizeText
+ * Cleans up the raw text ONCE before any rendering.
+ * - Collapses 3+ consecutive newlines to 2 (preserves intentional spacing)
+ * - Trims trailing spaces per line
+ * - Leaves all other whitespace intact
+ */
+function normalizeText(text){
+  return text
+    .replace(/\r\n/g,'\n')
+    .replace(/\r/g,'\n')
+    .replace(/\n{3,}/g,'\n\n')
+    .replace(/[ \t]+$/gm,'')
+    .trim();
 }
 
-function appendUserBubble(text) {
-  const div = document.createElement('div');
-  div.className = 'msg user';
-  div.innerHTML = `
-    <div class="msg-avatar user">U</div>
-    <div class="bubble">${escHtml(text)}</div>`;
+/*
+ * FIXED: appendUserBubble
+ * Uses escHtml only — user text is plain, no markdown needed.
+ * white-space:pre-wrap on .bubble handles newlines from CSS.
+ */
+function appendUserBubble(text){
+  var div=document.createElement('div');
+  div.className='msg user';
+  var avatar=document.createElement('div');
+  avatar.className='msg-avatar user';
+  avatar.textContent='U';
+  var bubble=document.createElement('div');
+  bubble.className='bubble';
+  bubble.textContent=text; /* FIXED: textContent keeps whitespace via CSS pre-wrap */
+  div.appendChild(avatar);
+  div.appendChild(bubble);
   document.getElementById('chat-inner').appendChild(div);
 }
 
-function appendBotBubbleInstant(text) {
-  const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.innerHTML = `
-    <div class="msg-avatar bot">🤖</div>
-    <div class="bubble">${formatText(text)}</div>`;
+/*
+ * FIXED: appendBotBubbleInstant (used when loading history)
+ * Applies bold markdown inline via a safe helper.
+ * white-space:pre-wrap handles line breaks from CSS.
+ */
+function applyBoldMarkdown(container, text){
+  /* Split on **...** markers and build DOM nodes — no innerHTML on the bubble */
+  var parts=text.split(/(\*\*.*?\*\*)/g);
+  parts.forEach(function(part){
+    if(part.startsWith('**')&&part.endsWith('**')&&part.length>4){
+      var strong=document.createElement('strong');
+      strong.textContent=part.slice(2,-2);
+      container.appendChild(strong);
+    }else{
+      container.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
+function appendBotBubbleInstant(text){
+  var normalized=normalizeText(text);
+  var div=document.createElement('div');
+  div.className='msg bot';
+  var avatar=document.createElement('div');
+  avatar.className='msg-avatar bot';
+  avatar.textContent='🤖';
+  var bubble=document.createElement('div');
+  bubble.className='bubble';
+  applyBoldMarkdown(bubble,normalized); /* FIXED: no innerHTML, DOM nodes only */
+  div.appendChild(avatar);
+  div.appendChild(bubble);
   document.getElementById('chat-inner').appendChild(div);
 }
 
-// IMPROVED — crisis bubbles get a soft "you're not alone" tag
-function typewriterBot(text, isCrisis=false) {
-  return new Promise(resolve => {
-    const div = document.createElement('div');
-    div.className = 'msg bot' + (isCrisis ? ' crisis' : '');
+/*
+ * FIXED: typewriterBot — the core fix
+ *
+ * OLD (broken) approach:
+ *   1. Type chars into a <span> with cursor
+ *   2. On finish, REPLACE innerHTML with formatText() → causes layout jump
+ *      because formatText() used <br> for \n but the span used textContent,
+ *      so dimensions changed at the end.
+ *
+ * NEW (fixed) approach:
+ *   1. Normalize text once at the start
+ *   2. The bubble uses white-space:pre-wrap (CSS), so \n renders as a line
+ *      break automatically — no need for <br> at all
+ *   3. During typing: insert one character at a time as a Text node before
+ *      the cursor element — no innerHTML is ever touched
+ *   4. On finish: remove cursor, apply bold markdown via DOM nodes —
+ *      NO innerHTML replacement on the bubble, so zero layout jump
+ *   5. Bold markers (**text**) are held in a buffer and flushed as a
+ *      <strong> node when the closing ** is detected during typing
+ */
+function typewriterBot(text,isCrisis){
+  return new Promise(function(resolve){
+    var normalized=normalizeText(text);
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+    var div=document.createElement('div');
+    div.className='msg bot'+(isCrisis?' crisis':'');
 
-    // ADDED — gentle crisis tag above text
-    if (isCrisis) {
-      const tag = document.createElement('div');
-      tag.className = 'crisis-tag';
-      tag.textContent = '🤍 You\'re not alone';
+    var avatar=document.createElement('div');
+    avatar.className='msg-avatar bot';
+    avatar.textContent='🤖';
+
+    var bubble=document.createElement('div');
+    bubble.className='bubble';
+
+    if(isCrisis){
+      var tag=document.createElement('div');
+      tag.className='crisis-tag';
+      tag.textContent='🤍 You\'re not alone';
       bubble.appendChild(tag);
     }
 
-    const textNode = document.createElement('span');
-    const cursor = document.createElement('span');
-    cursor.className = 'typing-cursor';
-    textNode.appendChild(cursor);
-    bubble.appendChild(textNode);
+    /* FIXED: cursor is a separate DOM node — never inside a text node */
+    var cursor=document.createElement('span');
+    cursor.className='typing-cursor';
+    bubble.appendChild(cursor);
 
-    div.innerHTML = `<div class="msg-avatar bot">🤖</div>`;
+    div.appendChild(avatar);
     div.appendChild(bubble);
     document.getElementById('chat-inner').appendChild(div);
     scrollBottom();
 
-    const baseDelay = text.length > 200 ? 11 : 20;
-    let i = 0;
+    var i=0;
+    var len=normalized.length;
+    var baseDelay=len>200?11:20;
 
-    function typeChar() {
-      if (i < text.length) {
-        textNode.insertBefore(document.createTextNode(text[i]), cursor);
-        i++;
-        let d = baseDelay + Math.random() * 7;
-        if ('.!?'.includes(text[i-1])) d += 160;
-        else if (',;:'.includes(text[i-1])) d += 70;
-        scrollBottom();
-        setTimeout(typeChar, d);
-      } else {
+    /*
+     * FIXED: bold buffer
+     * We track whether we're inside **...** during typing.
+     * Characters are held in boldBuf until the closing ** is found,
+     * then flushed as a <strong> DOM node — no post-render replacement needed.
+     */
+    var boldBuf='';
+    var inBold=false;
+    var starPending=false; /* true when we saw one * and are waiting for a second */
+
+    function flushText(str){
+      if(!str)return;
+      /* Insert text node before the cursor */
+      bubble.insertBefore(document.createTextNode(str),cursor);
+    }
+
+    function flushBold(){
+      if(!boldBuf)return;
+      var strong=document.createElement('strong');
+      strong.textContent=boldBuf;
+      bubble.insertBefore(strong,cursor);
+      boldBuf='';
+      inBold=false;
+    }
+
+    function typeChar(){
+      if(i>=len){
+        /* FIXED: just remove cursor — bubble content is already correct DOM,
+           no innerHTML replacement needed, so NO layout jump */
         cursor.remove();
-        // Re-render with full formatting
-        if (isCrisis) {
-          const tag = bubble.querySelector('.crisis-tag');
-          bubble.innerHTML = '';
-          if (tag) bubble.appendChild(tag);
-          const formatted = document.createElement('span');
-          formatted.innerHTML = formatText(text);
-          bubble.appendChild(formatted);
-        } else {
-          bubble.innerHTML = formatText(text);
-        }
         scrollBottom();
         resolve();
+        return;
       }
+
+      var ch=normalized[i];
+      i++;
+
+      /* Bold marker detection: accumulate * chars */
+      if(ch==='*'){
+        if(starPending){
+          /* second star: toggle bold mode */
+          starPending=false;
+          if(!inBold){
+            inBold=true;
+            boldBuf='';
+          }else{
+            /* closing **: flush bold buffer as <strong> */
+            flushBold();
+          }
+        }else{
+          starPending=true;
+        }
+        scheduleNext(ch);
+        return;
+      }
+
+      /* Flush a lone star that wasn't part of ** */
+      if(starPending){
+        flushText('*');
+        starPending=false;
+      }
+
+      if(inBold){
+        boldBuf+=ch;
+        /* Don't append to DOM yet — wait for closing ** */
+      }else{
+        flushText(ch);
+      }
+
+      scrollBottom();
+      scheduleNext(ch);
     }
+
+    function scheduleNext(ch){
+      var d=baseDelay+Math.random()*7;
+      if('.!?'.indexOf(ch)>-1)d+=160;
+      else if(',;:'.indexOf(ch)>-1)d+=70;
+      setTimeout(typeChar,d);
+    }
+
     typeChar();
   });
 }
 
-function showTypingIndicator() {
-  const div = document.createElement('div');
-  div.className = 'typing-wrap';
-  div.id = 'typing-ind';
-  div.innerHTML = `
-    <div class="msg-avatar bot">🤖</div>
-    <div class="typing-bubble">
-      <div class="t-dot"></div>
-      <div class="t-dot"></div>
-      <div class="t-dot"></div>
-    </div>`;
+function showTypingIndicator(){
+  var div=document.createElement('div');
+  div.className='typing-wrap';div.id='typing-ind';
+  div.innerHTML='<div class="msg-avatar bot">🤖</div>'
+    +'<div class="typing-bubble">'
+    +'<div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>'
+    +'</div>';
   document.getElementById('chat-inner').appendChild(div);
   scrollBottom();
 }
-function hideTypingIndicator() {
-  const el = document.getElementById('typing-ind');
-  if (el) el.remove();
+function hideTypingIndicator(){
+  var el=document.getElementById('typing-ind');
+  if(el)el.remove();
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
- * SEND MESSAGE — IMPROVED send button states
- * ═══════════════════════════════════════════════════════════════════════ */
-let localMessages = [];
-
-function setSendLoading(loading) {
-  const btn = document.getElementById('send-btn');
-  btn.classList.toggle('loading', loading);
-  btn.disabled = loading;
+/* ═══════════════════════════════════════════════════════════════
+ * SEND MESSAGE
+ * ═══════════════════════════════════════════════════════════════ */
+function setSendLoading(loading){
+  var btn=document.getElementById('send-btn');
+  btn.classList.toggle('loading',loading);
+  btn.disabled=loading;
 }
 
-async function sendMessage() {
-  const input = document.getElementById('msg-input');
-  const text = input.value.trim();
-  if (!text || isTyping) return;
+function delay(ms){return new Promise(function(r){setTimeout(r,ms)})}
 
-  if (!currentSessionId) currentSessionId = 'session_' + Date.now();
+async function sendMessage(){
+  var input=document.getElementById('msg-input');
+  var text=input.value.trim();
+  if(!text||isTyping)return;
+
+  if(!currentSessionId)currentSessionId='session_'+Date.now();
   showChatScreen();
 
-  input.value = '';
-  input.style.height = 'auto';
-  isTyping = true;
-  setSendLoading(true);
+  input.value='';input.style.height='auto';
+  isTyping=true;setSendLoading(true);
 
   appendUserBubble(text);
-  localMessages.push({ role:'user', content:text });
+  localMessages.push({role:'user',content:text});
 
   await delay(280);
   showTypingIndicator();
 
-  try {
-    const res  = await fetch('/chat', {
+  try{
+    var res=await fetch('/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ message: text })
+      body:JSON.stringify({message:text})
     });
-    const data = await res.json();
+    var data=await res.json();
 
-    const readDelay = Math.min(500 + text.length * 7, 1600);
+    var readDelay=Math.min(500+text.length*7,1600);
     await delay(readDelay);
     hideTypingIndicator();
 
-    await typewriterBot(data.reply, data.is_crisis);
-    localMessages.push({ role:'assistant', content:data.reply });
+    await typewriterBot(data.reply,data.is_crisis);
+    localMessages.push({role:'assistant',content:data.reply});
 
-    if (data.nudge) {
-      const nudgeDiv = document.createElement('div');
-      nudgeDiv.className = 'nudge';
-      nudgeDiv.innerHTML = `<div class="nudge-inner">💡 ${escHtml(data.nudge)}</div>`;
+    if(data.nudge){
+      var nudgeDiv=document.createElement('div');
+      nudgeDiv.className='nudge';
+      nudgeDiv.innerHTML='<div class="nudge-inner">💡 '+escHtml(data.nudge)+'</div>';
       document.getElementById('chat-inner').appendChild(nudgeDiv);
       scrollBottom();
     }
 
     saveCurrentSession(localMessages);
-
-  } catch(err) {
+  }catch(err){
     hideTypingIndicator();
     await typewriterBot("I'm having a little trouble connecting right now. Please try again in a moment — I'm here.");
   }
 
-  isTyping = false;
-  setSendLoading(false);
+  isTyping=false;setSendLoading(false);
   input.focus();
 }
 
-// IMPROVED — chips fill the input, give user control before sending
-function quickFill(text) {
-  const input = document.getElementById('msg-input');
-  input.value = text;
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+/* ═══════════════════════════════════════════════════════════════
+ * CHIPS
+ * ═══════════════════════════════════════════════════════════════ */
+function quickFill(text){
+  var input=document.getElementById('msg-input');
+  input.value=text;
+  input.style.height='auto';
+  input.style.height=Math.min(input.scrollHeight,120)+'px';
   input.focus();
-  // Move caret to end
-  input.selectionStart = input.selectionEnd = text.length;
-  // Visual feedback on chip
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('filling'));
-  const chips = document.querySelectorAll('.chip');
-  chips.forEach(c => {
-    if (c.getAttribute('onclick') && c.getAttribute('onclick').includes(text.replace(/'/g,"\\'").substring(0,15))) {
+  input.selectionStart=input.selectionEnd=text.length;
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('filling')});
+  document.querySelectorAll('.chip').forEach(function(c){
+    var oc=c.getAttribute('onclick')||'';
+    if(oc.indexOf(text.replace(/'/g,"\\'").substring(0,15))>-1){
       c.classList.add('filling');
-      setTimeout(() => c.classList.remove('filling'), 1200);
+      setTimeout(function(){c.classList.remove('filling')},1200);
     }
   });
 }
+function quickSend(text){quickFill(text)}
 
-// Kept for backwards compat if needed anywhere
-function quickSend(text) { quickFill(text); }
-
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-/* ═══════════════════════════════════════════════════════════════════════
- * INPUT HANDLERS — IMPROVED mobile handling
- * ═══════════════════════════════════════════════════════════════════════ */
-const msgInput = document.getElementById('msg-input');
-
-msgInput.addEventListener('input', () => {
-  msgInput.style.height = 'auto';
-  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+/* ═══════════════════════════════════════════════════════════════
+ * INPUT HANDLERS
+ * ═══════════════════════════════════════════════════════════════ */
+var msgInput=document.getElementById('msg-input');
+msgInput.addEventListener('input',function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,120)+'px';
 });
-
-msgInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
+msgInput.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}
 });
+document.getElementById('chat-screen').addEventListener('touchstart',function(){
+  if(document.activeElement===msgInput)msgInput.blur();
+},{passive:true});
 
-// ADDED — on mobile, blur input when scrolling chat (prevents keyboard blocking)
-document.getElementById('chat-screen').addEventListener('touchstart', () => {
-  if (document.activeElement === msgInput) msgInput.blur();
-}, { passive: true });
-
-/* ── Init ────────────────────────────────────────────────────────────── */
+/* ── Init ── */
 msgInput.focus();
-currentSessionId = 'session_' + Date.now();
+currentSessionId='session_'+Date.now();
 </script>
 </body>
 </html>
