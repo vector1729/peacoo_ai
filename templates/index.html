@@ -14,6 +14,7 @@
   --accent:      #2ecc71;
   --accent2:     #27ae60;
   --accent-glow: rgba(46,204,113,0.25);
+  --accent-soft: rgba(46,204,113,0.12);
   --radius:      16px;
   --sans:        'Plus Jakarta Sans', sans-serif;
   --display:     'Sora', sans-serif;
@@ -48,6 +49,11 @@
   --crisis-bg:   rgba(255,107,107,0.08);
   --crisis-border: rgba(255,107,107,0.3);
   --crisis-text: #ffaaaa;
+  --hero-panel:  rgba(8,24,12,0.72);
+  --hero-panel-strong: rgba(255,255,255,0.06);
+  --welcome-grid-border: rgba(255,255,255,0.08);
+  --shadow-soft: 0 18px 60px rgba(0,0,0,0.28);
+  --shadow-accent: 0 18px 40px rgba(46,204,113,0.16);
 }
 
 [data-theme="light"] {
@@ -76,6 +82,11 @@
   --crisis-bg:   rgba(220,50,50,0.06);
   --crisis-border: rgba(220,50,50,0.25);
   --crisis-text: #b91c1c;
+  --hero-panel:  rgba(255,255,255,0.72);
+  --hero-panel-strong: rgba(255,255,255,0.92);
+  --welcome-grid-border: rgba(0,0,0,0.08);
+  --shadow-soft: 0 20px 56px rgba(32,64,40,0.10);
+  --shadow-accent: 0 18px 34px rgba(39,174,96,0.12);
 }
 
 html,body{height:100%;overflow:hidden;font-family:var(--sans)}
@@ -95,6 +106,15 @@ body::before{
     radial-gradient(ellipse 60% 80% at 80% 90%, var(--radial2) 0%, transparent 60%);
   pointer-events:none;z-index:0;
   transition:background var(--transition);
+}
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.02) 48%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.08) 100%);
+  pointer-events:none;
+  z-index:0;
 }
 
 #sidebar{
@@ -142,24 +162,25 @@ body::before{
 .history-empty .icon{font-size:2rem;margin-bottom:8px}
 
 .history-session{
-  margin-bottom:6px;border-radius:12px;
-  background:var(--surface);border:1px solid var(--border);
+  margin-bottom:8px;border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--surface3));border:1px solid var(--border);
   cursor:pointer;transition:all .2s;overflow:hidden;
 }
-.history-session:hover{background:var(--surface2);border-color:rgba(46,204,113,0.3)}
-.history-session.active{border-color:var(--accent);background:rgba(46,204,113,0.08)}
+.history-session:hover{background:var(--surface2);border-color:rgba(46,204,113,0.22);transform:translateY(-1px)}
+.history-session.active{border-color:rgba(46,204,113,0.3);background:rgba(46,204,113,0.06);box-shadow:inset 0 0 0 1px rgba(46,204,113,0.08)}
 
 .session-header{
-  padding:12px 14px;display:flex;align-items:center;gap:10px;
+  padding:13px 14px;display:flex;align-items:center;gap:10px;
 }
 .session-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--accent);flex-shrink:0;
+  width:7px;height:7px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#8af2b2);flex-shrink:0;
+  box-shadow:0 0 0 4px var(--accent-soft);
 }
 .session-info{flex:1;min-width:0}
-.session-date{font-size:.72rem;color:var(--text-dim);margin-bottom:2px}
+.session-date{font-size:.69rem;color:var(--text-dim2);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
 .session-preview{
-  font-size:.82rem;color:var(--text);
+  font-size:.84rem;color:var(--text);font-weight:500;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .session-del{
@@ -179,9 +200,10 @@ body::before{
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   border:none;color:#0a1f0a;font-weight:600;font-size:.85rem;
   cursor:pointer;font-family:var(--sans);
-  transition:opacity .2s,transform .15s;
+  transition:opacity .2s,transform .15s,box-shadow .2s;
+  box-shadow:var(--shadow-accent);
 }
-.btn-new-session:hover{opacity:.9;transform:translateY(-1px)}
+.btn-new-session:hover{opacity:.94;transform:translateY(-1px);box-shadow:0 14px 28px rgba(46,204,113,0.18)}
 
 #overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.5);
@@ -211,7 +233,7 @@ header{
   display:flex;align-items:center;justify-content:center;
   transition:all .2s;flex-direction:column;gap:4px;padding:10px;
 }
-.btn-menu:hover{background:var(--surface2);border-color:rgba(46,204,113,0.4)}
+.btn-menu:hover{background:var(--surface2);border-color:var(--border);transform:translateY(-1px)}
 .menu-line{width:16px;height:1.5px;border-radius:99px;background:var(--text);transition:all .2s}
 
 .header-brand{display:flex;align-items:center;gap:10px}
@@ -219,7 +241,7 @@ header{
   width:36px;height:36px;border-radius:10px;
   background:linear-gradient(135deg,#2ecc71,#1a9e50);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 16px rgba(46,204,113,0.35);
+  box-shadow:0 10px 24px rgba(46,204,113,0.22);
   font-size:20px;
 }
 .brand-name{
@@ -236,8 +258,8 @@ header{
 
 .brand-status{
   display:flex;align-items:center;gap:5px;
-  font-size:.68rem;color:var(--accent);
-  -webkit-text-fill-color:var(--accent);
+  font-size:.68rem;color:var(--text-dim);
+  -webkit-text-fill-color:var(--text-dim);
 }
 .status-dot{
   width:6px;height:6px;border-radius:50%;
@@ -257,7 +279,7 @@ header{
   display:flex;align-items:center;justify-content:center;
   transition:all .2s;
 }
-.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:rgba(46,204,113,0.4)}
+.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border);transform:translateY(-1px)}
 .icon-btn svg{width:16px;height:16px}
 
 main{
@@ -268,25 +290,82 @@ main{
 #welcome-screen{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  padding:40px 24px;
+  padding:34px 24px 40px;
   animation:fade-up .7s ease;
 }
 #welcome-screen.hidden{display:none}
 
+.welcome-shell{
+  width:min(1080px,100%);
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(290px,.9fr);
+  gap:22px;
+  align-items:stretch;
+}
+
+.welcome-panel{
+  position:relative;
+  overflow:hidden;
+  padding:30px;
+  border-radius:30px;
+  border:1px solid var(--welcome-grid-border);
+  background:
+    radial-gradient(circle at top left, rgba(46,204,113,0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(125,255,179,0.10), transparent 26%),
+    linear-gradient(180deg,var(--hero-panel),var(--hero-panel-strong));
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(22px);
+}
+.welcome-panel::before{
+  content:'';
+  position:absolute;
+  inset:18px;
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:24px;
+  pointer-events:none;
+}
+
+.welcome-main{
+  position:relative;
+  z-index:1;
+  max-width:560px;
+}
+
+.welcome-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:18px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(46,204,113,0.18);
+  background:rgba(46,204,113,0.08);
+  color:var(--text);
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.welcome-eyebrow-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#8af2b2);
+  box-shadow:0 0 0 4px rgba(46,204,113,0.10);
+}
+
 .robot-avatar{
-  width:96px;height:96px;margin-bottom:24px;
+  width:104px;height:104px;margin-bottom:24px;
   position:relative;
 }
 .robot-body{
   width:100%;height:100%;
   background:linear-gradient(135deg,#2ecc71,#1abc9c,#27ae60);
-  border-radius:50%;
+  border-radius:32px;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:
-    0 0 40px rgba(46,204,113,0.35),
-    0 0 80px rgba(46,204,113,0.12);
+  box-shadow:var(--shadow-accent);
   animation:robot-float 4s ease-in-out infinite;
-  font-size:48px;
+  font-size:50px;
 }
 .robot-antenna{
   position:absolute;top:-12px;left:50%;transform:translateX(-50%);
@@ -309,15 +388,19 @@ main{
 }
 
 .welcome-label{
-  font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--accent);font-weight:500;margin-bottom:10px;
-  opacity:.85;
+  font-size:.74rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--text-dim2);
+  font-weight:600;
+  margin-bottom:12px;
 }
 
 .welcome-title{
-  font-family:var(--display);font-size:2.1rem;font-weight:600;
-  text-align:center;line-height:1.25;margin-bottom:10px;
+  font-family:var(--display);font-size:clamp(2.3rem,4vw,3.6rem);font-weight:600;
+  line-height:1.05;margin-bottom:14px;
   color:var(--text);
+  letter-spacing:-0.04em;
 }
 .welcome-title span{
   background:linear-gradient(135deg,#2ecc71,#7dffb3);
@@ -326,50 +409,148 @@ main{
 }
 
 .welcome-sub{
-  color:var(--text-dim);font-size:.9rem;
-  text-align:center;max-width:360px;line-height:1.7;margin-bottom:10px;
+  color:var(--text-dim);font-size:1rem;
+  max-width:480px;line-height:1.8;margin-bottom:20px;
 }
 
 .welcome-nudge{
-  font-size:.75rem;color:var(--text-dim2);
-  text-align:center;margin-bottom:26px;
+  font-size:.77rem;color:var(--text-dim2);
+  margin-bottom:16px;
   display:flex;align-items:center;gap:10px;
-  justify-content:center;
-}
-.welcome-nudge::before,
-.welcome-nudge::after{
-  content:'';width:32px;height:1px;
-  background:var(--border);display:block;
-  border-radius:99px;
+  justify-content:flex-start;
+  letter-spacing:.04em;
+  text-transform:uppercase;
 }
 
 .quick-chips{
   display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
-  max-width:480px;
+  max-width:560px;
+  justify-content:flex-start;
 }
 .chip{
-  padding:9px 17px;border-radius:99px;
+  padding:11px 16px;border-radius:999px;
   background:var(--surface);border:1px solid var(--border);
-  color:var(--text-dim);font-size:.82rem;cursor:pointer;
+  color:var(--text);font-size:.82rem;cursor:pointer;
   transition:all .22s cubic-bezier(.2,.8,.3,1);
   font-family:var(--sans);
   position:relative;overflow:hidden;
+  backdrop-filter:blur(10px);
 }
 .chip:hover{
   background:rgba(46,204,113,0.10);
-  border-color:rgba(46,204,113,0.45);
-  color:var(--accent);transform:translateY(-2px);
-  box-shadow:0 4px 16px rgba(46,204,113,0.12);
+  border-color:rgba(46,204,113,0.25);
+  color:var(--text);transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(46,204,113,0.10);
 }
 .chip:active{transform:translateY(0) scale(.97)}
 .chip.filling{
-  border-color:var(--accent);
+  border-color:rgba(46,204,113,0.3);
   background:rgba(46,204,113,0.12);
-  color:var(--accent);
+  color:var(--text);
+}
+
+.welcome-side{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.mood-card,
+.care-card{
+  border-radius:24px;
+  border:1px solid var(--welcome-grid-border);
+  background:linear-gradient(180deg,var(--hero-panel),var(--hero-panel-strong));
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(20px);
+}
+
+.mood-card{
+  padding:22px;
+}
+.mood-card-label{
+  font-size:.72rem;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--text-dim2);
+  margin-bottom:14px;
+}
+.mood-card-grid{
+  display:grid;
+  gap:12px;
+}
+.mood-pill{
+  padding:14px 15px;
+  border-radius:18px;
+  background:var(--surface);
+  border:1px solid var(--border);
+}
+.mood-pill strong{
+  display:block;
+  font-size:.9rem;
+  font-weight:600;
+  margin-bottom:4px;
+}
+.mood-pill span{
+  display:block;
+  color:var(--text-dim);
+  font-size:.8rem;
+  line-height:1.55;
+}
+
+.care-card{
+  padding:22px;
+}
+.care-title{
+  font-family:var(--display);
+  font-size:1.1rem;
+  margin-bottom:8px;
+}
+.care-copy{
+  color:var(--text-dim);
+  font-size:.85rem;
+  line-height:1.7;
+  margin-bottom:16px;
+}
+.care-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.care-item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px 0;
+  border-top:1px solid var(--border2);
+}
+.care-item:first-child{
+  padding-top:0;
+  border-top:none;
+}
+.care-icon{
+  width:30px;
+  height:30px;
+  border-radius:12px;
+  background:rgba(46,204,113,0.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.care-item strong{
+  display:block;
+  font-size:.84rem;
+  margin-bottom:3px;
+}
+.care-item span{
+  display:block;
+  color:var(--text-dim);
+  font-size:.78rem;
+  line-height:1.55;
 }
 
 #chat-screen{
-  flex:1;overflow-y:auto;padding:24px 0;
+  flex:1;overflow-y:auto;padding:30px 0 36px;
   scroll-behavior:smooth;
 }
 #chat-screen.hidden{display:none}
@@ -378,7 +559,7 @@ main{
 
 .chat-inner{
   max-width:700px;margin:0 auto;
-  padding:0 20px;
+  padding:0 24px;
   display:flex;flex-direction:column;gap:16px;
 }
 
@@ -410,26 +591,27 @@ main{
    jump at the end. word-break prevents horizontal overflow. ── */
 .bubble{
   max-width:75%;
-  padding:14px 18px;
-  line-height:1.75;
-  font-size:.9rem;
-  border-radius:18px;
+  padding:15px 18px;
+  line-height:1.82;
+  font-size:.94rem;
+  border-radius:22px;
   transition:background var(--transition), border-color var(--transition);
   white-space:pre-wrap;   /* FIXED: renders newlines during typing */
   word-break:break-word;  /* FIXED: prevents overflow on long words */
   overflow-wrap:break-word;
+  box-shadow:0 10px 24px rgba(0,0,0,0.06);
 }
 .msg.bot .bubble{
-  background:var(--bubble-bot);
+  background:linear-gradient(180deg,var(--bubble-bot),var(--surface3));
   border:1px solid var(--border);
   color:var(--text);
-  border-bottom-left-radius:5px;
+  border-bottom-left-radius:8px;
 }
 .msg.user .bubble{
-  background:var(--bubble-user-bg);
+  background:linear-gradient(180deg,var(--bubble-user-bg),rgba(46,204,113,0.10));
   border:1px solid var(--bubble-user-border);
   color:var(--text);
-  border-bottom-right-radius:5px;
+  border-bottom-right-radius:8px;
 }
 
 .msg.crisis .bubble{
@@ -495,16 +677,16 @@ main{
 .nudge-inner{
   background:rgba(46,204,113,0.05);
   border:1px solid rgba(46,204,113,0.18);
-  border-radius:12px;padding:10px 16px;
+  border-radius:16px;padding:12px 16px;
   font-size:.79rem;color:var(--accent);
   display:flex;gap:8px;align-items:flex-start;
   line-height:1.5;
 }
 
 footer{
-  padding:14px 20px 18px;
-  background:var(--footer-bg);
-  border-top:1px solid var(--border);
+  padding:12px 20px 18px;
+  background:linear-gradient(180deg,rgba(0,0,0,0),var(--footer-bg));
+  border-top:1px solid var(--border2);
   backdrop-filter:blur(20px);
   position:relative;z-index:10;flex-shrink:0;
   transition:background var(--transition);
@@ -515,14 +697,15 @@ footer{
 }
 .input-wrap{
   display:flex;gap:10px;align-items:flex-end;
-  background:var(--input-bg);
+  background:linear-gradient(180deg,var(--input-bg),var(--surface3));
   border:1px solid var(--border);
-  border-radius:20px;padding:8px 8px 8px 18px;
+  border-radius:22px;padding:9px 9px 9px 18px;
   transition:border-color .25s, box-shadow .25s, background var(--transition);
+  box-shadow:var(--shadow-soft);
 }
 .input-wrap:focus-within{
-  border-color:rgba(46,204,113,0.5);
-  box-shadow:0 0 0 3px rgba(46,204,113,0.08);
+  border-color:rgba(46,204,113,0.28);
+  box-shadow:0 0 0 4px rgba(46,204,113,0.07), var(--shadow-soft);
 }
 #msg-input{
   flex:1;background:none;border:none;outline:none;
@@ -567,7 +750,7 @@ footer{
 
 .footer-hint{
   max-width:700px;margin:8px auto 0;
-  font-size:.67rem;color:var(--text-dim2);
+  font-size:.68rem;color:var(--text-dim2);
   text-align:center;letter-spacing:.02em;
   line-height:1.6;
 }
@@ -586,14 +769,15 @@ footer{
 .modal-card{
   position:relative;z-index:1;
   background:var(--modal-bg);border:1px solid var(--border);
-  border-radius:20px;padding:28px;max-width:400px;width:100%;
+  border-radius:26px;padding:28px;max-width:420px;width:100%;
   animation:modal-in .25s cubic-bezier(.2,.8,.3,1);
   transition:background var(--transition);
+  box-shadow:var(--shadow-soft);
 }
 @keyframes modal-in{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:none;opacity:1}}
 .modal-card h3{
   font-family:var(--display);font-size:1.1rem;
-  color:var(--accent);margin-bottom:12px;
+  color:var(--text);margin-bottom:12px;
 }
 .modal-card p{
   font-size:.85rem;color:var(--text-dim);line-height:1.7;margin-bottom:10px;
@@ -622,8 +806,8 @@ footer{
 
 .theme-toggle-row{
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;padding:12px 16px;
+  background:linear-gradient(180deg,var(--surface),var(--surface3));border:1px solid var(--border);
+  border-radius:16px;padding:14px 16px;
 }
 .theme-toggle-info{display:flex;align-items:center;gap:10px}
 .theme-icon{font-size:1.2rem}
@@ -661,7 +845,7 @@ footer{
   display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;
 }
 .theme-preview-card{
-  border-radius:10px;padding:10px 12px;cursor:pointer;
+  border-radius:14px;padding:10px 12px;cursor:pointer;
   border:2px solid transparent;
   transition:border-color .2s, transform .15s;
   position:relative;
@@ -723,14 +907,32 @@ footer{
 #scroll-btn.visible{opacity:1;pointer-events:all}
 #scroll-btn:hover{background:rgba(46,204,113,0.15);border-color:rgba(46,204,113,0.4);color:var(--accent)}
 
+@media(max-width:860px){
+  .welcome-shell{
+    grid-template-columns:1fr;
+    max-width:760px;
+  }
+  .welcome-panel,
+  .mood-card,
+  .care-card{
+    border-radius:24px;
+  }
+}
+
 @media(max-width:560px){
-  .welcome-title{font-size:1.75rem}
+  #welcome-screen{padding:20px 14px 26px}
+  .welcome-panel,.mood-card,.care-card{padding:18px}
+  .welcome-title{font-size:2rem}
+  .welcome-sub{font-size:.92rem}
+  .quick-chips{max-width:none}
+  .chip{width:100%;justify-content:flex-start;text-align:left}
   .bubble{max-width:90%;font-size:.875rem}
   .chat-inner{padding:0 12px}
   footer{padding:10px 12px 14px}
   .theme-previews{grid-template-columns:1fr 1fr}
   .input-wrap{padding:7px 7px 7px 14px}
   .footer-hint{display:none}
+  .brand-tag{display:none}
 }
 
 #welcome-screen,#chat-screen{
@@ -800,20 +1002,76 @@ footer{
 
 <main>
   <div id="welcome-screen">
+    <div class="welcome-shell">
+      <section class="welcome-panel">
+        <div class="welcome-main">
+          <div class="welcome-eyebrow">
+            <span class="welcome-eyebrow-dot"></span>
+            quiet space, real conversation
+          </div>
     <div class="robot-avatar">
       <div class="robot-antenna"></div>
       <div class="robot-body">🤖</div>
     </div>
-    <div class="welcome-label">Your gentle companion</div>
-    <h1 class="welcome-title">How are you feeling<br><span>right now?</span></h1>
-    <p class="welcome-sub">This is a calm space — no pressure, no judgment. Say as little or as much as you'd like.</p>
-    <div class="welcome-nudge">or just type whatever's on your mind</div>
+    <div class="welcome-label">your gentle companion</div>
+    <h1 class="welcome-title">How are you feeling <span>right now?</span></h1>
+    <p class="welcome-sub">This space is built to feel softer than a normal chatbot. No pressure to explain everything perfectly. Start messy, start small, or just say what feels heavy.</p>
+    <div class="welcome-nudge">try a gentle opening</div>
     <div class="quick-chips">
       <button class="chip" onclick="quickFill('I feel anxious 😰')">I feel anxious 😰</button>
       <button class="chip" onclick="quickFill('I need some motivation 🌿')">I need motivation 🌿</button>
       <button class="chip" onclick="quickFill('Can we do a breathing exercise? 🫁')">Let's breathe 🫁</button>
       <button class="chip" onclick="quickFill('I\'m feeling low today')">I'm feeling low</button>
       <button class="chip" onclick="quickFill('I\'m stressed about exams 📚')">Exam stress 📚</button>
+    </div>
+        </div>
+      </section>
+      <aside class="welcome-side">
+        <section class="mood-card">
+          <div class="mood-card-label">Start anywhere</div>
+          <div class="mood-card-grid">
+            <div class="mood-pill">
+              <strong>Heavy head</strong>
+              <span>Vent, spiral, overthink a little. The first message doesn't need structure.</span>
+            </div>
+            <div class="mood-pill">
+              <strong>Need grounding</strong>
+              <span>Ask for breathing, grounding, journaling, or a small reset.</span>
+            </div>
+            <div class="mood-pill">
+              <strong>Just checking in</strong>
+              <span>Even a one-line mood update works. You don't need a big reason to start.</span>
+            </div>
+          </div>
+        </section>
+        <section class="care-card">
+          <div class="care-title">What Peacoo is good at</div>
+          <div class="care-copy">A calmer tone, short supportive replies, and simple exercises when your brain feels loud.</div>
+          <div class="care-list">
+            <div class="care-item">
+              <div class="care-icon">B</div>
+              <div>
+                <strong>Breathing and grounding</strong>
+                <span>Quick nervous-system resets when things feel too fast.</span>
+              </div>
+            </div>
+            <div class="care-item">
+              <div class="care-icon">C</div>
+              <div>
+                <strong>Low-pressure conversation</strong>
+                <span>More like a gentle check-in than a clinical intake form.</span>
+              </div>
+            </div>
+            <div class="care-item">
+              <div class="care-icon">!</div>
+              <div>
+                <strong>Crisis redirect</strong>
+                <span>If something sounds urgent, it points you toward real-world support first.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
     </div>
   </div>
 
@@ -846,7 +1104,7 @@ footer{
   <div class="modal-bg" onclick="hideSettings()"></div>
   <div class="modal-card">
     <button class="modal-close" onclick="hideSettings()">✕</button>
-    <h3>⚙️ Settings</h3>
+    <h3>Settings</h3>
 
     <div class="settings-section">
       <div class="settings-label">Appearance</div>
@@ -894,7 +1152,7 @@ footer{
     <div class="settings-section">
       <div class="settings-label">About Peacoo</div>
       <p style="font-size:.85rem;color:var(--text-dim);line-height:1.7;margin-bottom:0">
-        Peacoo is a gentle AI wellness companion, built with care by <strong style="color:var(--accent)">Anshu Chaudhary</strong> — someone who believes everyone deserves a calm space to breathe and be heard. 🌿
+        Peacoo is a gentle AI wellness companion, built with care by <strong style="color:var(--accent)">Anshu Chaudhary</strong> for moments when you need something softer than a search box and less formal than therapy.
       </p>
       <p style="font-size:.82rem;color:var(--text-dim2);margin-top:8px;line-height:1.6">
         Not a replacement for professional care.
