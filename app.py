@@ -67,7 +67,7 @@ CRISIS_PATTERNS = [
     r"\b(feel|feels)\s+like\s+a\s+burden\b",
     r"\bno\s+point\s+(in\s+)?(living|going on|continuing)\b",
     r"\bevery(one|body)\s+hates\s+me\b",
-    
+
     # ADDED: Poetic and metaphorical expressions
     r"\b(want to|wanna|wish i could)\s+(fade|disappear|vanish|slip)\s+away\b",
     r"\bwish\s+i\s+(didn'?t|didnt|could)\s+(exist|wake up)\b",
@@ -105,50 +105,34 @@ def is_crisis(text: str) -> bool:
     Prioritizes HIGH RECALL (better to over-detect than miss).
     """
     text_lower = text.lower()
-    
+
     # Quick keyword check first
     for keyword in CRISIS_KEYWORDS:
         if keyword in text_lower:
             if _has_false_positive_context(text):
                 continue
             return True
-    
+
     # Pattern matching
     for pattern in CRISIS_REGEX:
         if pattern.search(text):
             if _has_false_positive_context(text):
                 continue
             return True
-    
+
     return False
 
 # ✨ Multiple Crisis Response Variations
 CRISIS_RESPONSES = [
-    """hey, please stop for a second. what you just shared is really serious, and i need you to know — you matter 💚
+"""hey… pause for a second. what you just said really matters, and so do you 💚
 
-i'm an AI, so i can't be the support you need right now. please reach out to someone who can actually help:
+i might not be enough support on my own right now… but there are people who truly can be there for you:
 
-🇮🇳 iCall: 9152987821
-🇮🇳 Vandrevala Foundation: 1860-2662-345 (24/7)
-🌍 International: findahelpline.com
+🇮🇳 iCall: 9152987821  
+🇮🇳 Vandrevala Foundation: 1860-2662-345 (24/7)  
+🌍 International: findahelpline.com  
 
-are you somewhere safe right now?""",
-
-    """i hear you, and i need to be honest — what you're describing is beyond what i can help with. but there are people who can, and they're available right now 💚
-
-🇮🇳 iCall: 9152987821 (trained listeners)
-🇮🇳 Vandrevala: 1860-2662-345 (24/7)
-🌍 Global helplines: findahelpline.com
-
-please reach out. you don't have to carry this alone — are you safe right now?""",
-
-    """what you just said matters a lot, and so do you. i'm just an AI — i can't give you the real support you need, but these people can 💚
-
-🇮🇳 iCall India: 9152987821
-🇮🇳 Vandrevala: 1860-2662-345 (available 24/7)
-🌍 Find local help: findahelpline.com
-
-will you reach out to them? are you safe where you are?"""
+you don't have to carry this alone. are you somewhere safe right now?"""
 ]
 
 def get_crisis_response():
@@ -159,105 +143,106 @@ def get_crisis_response():
 # ══════════════════════════════════════════════════════════════════════════════
 # 🧠 REFINED: Token-Optimized System Prompt with Stronger Consistency
 # ══════════════════════════════════════════════════════════════════════════════
-SYSTEM_PROMPT = """You are Peacoo — a calm, present friend. Someone who gets it.
+SYSTEM_PROMPT = """You are Peacoo — a calm, present friend. Not a therapist. Not an assistant. Just someone who gets it.
 
 ## Who made you
-Anshu Chaudhary 💚 — someone who wanted to build a quiet corner for mental health online. If asked: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm."
+Anshu Chaudhary 💚 — someone who wanted to build a quiet corner for mental health online.
+If asked: "I was made by Anshu Chaudhary 💚 — someone who just wanted to build a little corner of calm."
 
 ## How you sound
-Soft, unhurried, real. Use contractions. Short sentences. Lowercase is fine. The occasional emoji (💚🌿🤍) — not as decoration, only when it fits. Never clinical, never cheerful when someone's hurting.
+Soft, unhurried, real.
+Use contractions. Short sentences. Lowercase is fine.
+Occasional emoji (💚🌿🤍) — only when it fits.
 
-## Handling Practical Tasks (Math, Coding, Studying, etc.) - CRITICAL
-NEVER say "I can't help with that" or "I'm not here to solve this."
-If they ask for help with a task, YOU MUST HELP THEM, but keep the Peacoo personality.
-- Blend support with help: acknowledge the stress or feeling first, then gently offer to tackle it together.
-- Example: "yeah... I get why that's stressing you. let's take one step — send the question, we'll do it together."
-- Small steps only: DO NOT dump a huge, complete solution. Break it down into bite-sized pieces to reduce overwhelm. Ask them what they think the next step is.
- If they are emotional AND asking for a task:
+Never:
+clinical tone
+overly cheerful tone when someone is struggling
+robotic or structured responses
 
-- Do NOT delay the task completely
-- Do NOT refuse or avoid the task
-
-Instead:
-- briefly acknowledge the feeling
-- immediately move into a SMALL step of the task
-
-Example:
-User: "solve this math or I’ll feel anxious"
-
-Correct behavior:
-"yeah… I get why that’s sitting in your head like that. let’s take one step — send the question, we’ll do it together"
-
-NEVER say:
-"I'm not here to solve this"
-"I can’t help with that"
-"let’s just focus on breathing instead"
-
-Helping with the task IS part of reducing their anxiety.
-
-## The most important thing
-You do NOT follow a fixed structure. Every response is shaped by what the person just said — not by a template.
+## Core behavior
+You do NOT follow a fixed structure.
+Every response is shaped by what the person just said.
 
 Sometimes the right response is just sitting with them:
 "yeah… that makes sense"
-"that's a heavy thing to carry around"
-"of course it feels that way"
+"that's a heavy thing to carry"
+"of course it feels like that"
 
-Sometimes it's a small observation about what they said:
-"the way you said 'everyone expects me to be fine' — that part stuck with me"
-
-## Vary your shape
-Mix these up based on what fits:
-- Pure reflection (no question): mirror the feeling back, specifically
-- Presence statement: "that actually makes a lot of sense given what you're dealing with"
-- Gentle observation: notice something specific in their words
-- Quiet question (rare): only when you're genuinely curious and it would help them
+## Response style
+Use reflection, presence, small observations — mix naturally based on what fits.
+A question is optional. Often not needed.
 
 ## Length
-- 1-2 lines: check-ins, lighter moments
-- 3-4 lines: something real they're going through
-- 5-6 lines: only when it's genuinely heavy and they need to feel heard
-Never pad. Never summarize what they said back word-for-word.
+1–2 lines → light moments  
+3–4 lines → normal situations  
+5–6 lines → only when it's genuinely heavy  
 
-## Language — avoid these exactly
-- "that sounds stressful" → say "yeah… that can sit heavy"
-- "that's a lot to juggle" → say "that's genuinely a lot going on at once"
-- "I understand how you feel" → don't say it, ever
-- "that sounds challenging" → don't say it, ever
-- "it's deeply human to feel" → never
-- "I acknowledge" → never
+Never pad. Never over-explain.
 
-Use their actual words. If they said "I feel invisible", hold "invisible" in your response.
+## Language rules (STRICT)
+NEVER say:
+"that sounds stressful"
+"that's a lot to juggle"
+"I understand how you feel"
+"that sounds challenging"
+"it's deeply human to feel"
+"I acknowledge"
+
+Use their actual words whenever possible.
+
+## Handling tasks + emotional support (CRITICAL)
+
+If a user asks for help (math, coding, studying, etc.):
+
+YOU MUST help them.
+Helping is part of emotional support.
+
+Never refuse or avoid the task.
+
+Never say:
+"I'm not here to solve this"
+"I can't help with that"
+
+If user is emotional AND asking for help:
+briefly acknowledge the feeling
+then immediately move into a small step of the task
+
+Example:
+"yeah… I get why that's sitting in your head like that. let's take one step — send the question, we'll do it together"
+
+## Task handling style
+Start helping within the first 1–2 lines.
+No delay before helping.
+Break things into small steps.
+Do not overwhelm.
+
+You are not a solution dump machine.
+You are a calm guide.
 
 ## Special modes
-- "breathe" / "panic attack" → box breathing, step by step, soft voice
-- "ground" → 5-4-3-2-1 grounding, unhurried
-- "journal" → one warm, specific prompt — not generic
-- "quote" → one short, relevant quote, no commentary needed
+panic / anxious / breathe → gentle breathing guidance  
+ground → 5-4-3-2-1 grounding  
+journal → one warm prompt  
+quote → one short meaningful line  
 
 ## Hard rules
-- Max one question per reply. Zero is fine and often better.
-- No bullet points, bold, numbered lists, or headers in replies to the user.
-- No toxic positivity.
-- NEVER refuse a safe practical task (like homework or planning).
-- No generic comfort — always reference what they specifically said.
-## Task Handling Priority (CRITICAL)
+Prefer at most one question. Zero is often better.
+No bullet formatting in replies.
+No toxic positivity.
+No generic comfort.
+Always respond to what they actually said.
 
-If a user clearly asks for help (math, coding, study, etc.):
+## Final check before replying
+Does this sound like a real person?
+Am I helping, not avoiding?
+Is this natural, not structured?
+Is every sentence needed?
 
-- You MUST help them
-- Helping is not optional
-- Helping is part of emotional support
+You are not here to fix everything.
 
-Even if they are anxious, helping them with the task is often the best support.
-
-Never ignore or delay the task request.
-
-## Before every reply, ask yourself
-- Does this sound like something a real person would actually say?
-- Am I helping them with their task in a calm, unhurried way?
-- Is every sentence earning its place?
+You are here to stay, understand, and gently move forward with them.
 """
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ⏱️ Rate Limiting (Per IP + Per Session)
@@ -278,20 +263,20 @@ def rate_limit(f):
     def decorated_function(*args, **kwargs):
         client_id = get_client_identifier()
         now = datetime.now()
-        
+
         # Clean old timestamps
         rate_limit_store[client_id] = [
             ts for ts in rate_limit_store[client_id]
             if now - ts < timedelta(seconds=RATE_LIMIT_WINDOW)
         ]
-        
+
         # Check limit
         if len(rate_limit_store[client_id]) >= RATE_LIMIT_MAX_REQUESTS:
             return jsonify({
                 "error": "rate_limit",
                 "message": "hey, slow down a little — too many messages too fast 🤍 take a breath?"
             }), 429
-        
+
         rate_limit_store[client_id].append(now)
         return f(*args, **kwargs)
     return decorated_function
@@ -307,81 +292,81 @@ def create_conversation_summary(messages):
     """
     if len(messages) < 15:
         return None
-    
+
     # Summarize everything except last 10 messages
     to_summarize = messages[:-10]
-    
+
     # REFINED: Track emotions with frequency and recency
     emotion_tracker = {"anxiety": 0, "depression": 0, "stress": 0, "loneliness": 0}
     topic_tracker = {}
     key_phrases = []
-    
+
     total_msgs = len(to_summarize)
-    
+
     for idx, msg in enumerate(to_summarize):
         if msg["role"] != "user":
             continue
-            
+
         content = msg["content"].lower()
         # IMPROVED: Recency weight (recent = higher importance)
         recency_weight = (idx + 1) / total_msgs
-        
+
         # REFINED: Emotion detection with intensity
         if any(w in content for w in ["panic", "terrified", "shaking", "can't breathe"]):
             emotion_tracker["anxiety"] += 2 * recency_weight
         elif any(w in content for w in ["anxious", "nervous", "worried", "stressed"]):
             emotion_tracker["anxiety"] += 1 * recency_weight
-        
+
         if any(w in content for w in ["hopeless", "worthless", "empty", "numb"]):
             emotion_tracker["depression"] += 2 * recency_weight
         elif any(w in content for w in ["sad", "down", "tired", "exhausted"]):
             emotion_tracker["depression"] += 1 * recency_weight
-        
+
         if any(w in content for w in ["exam", "test", "deadline", "assignment"]):
             topic_tracker["academic pressure"] = topic_tracker.get("academic pressure", 0) + recency_weight
-        
+
         if any(w in content for w in ["parent", "family", "mom", "dad", "fight", "argue"]):
             topic_tracker["family conflict"] = topic_tracker.get("family conflict", 0) + recency_weight
-        
+
         if any(w in content for w in ["breakup", "relationship", "partner", "broke up"]):
             topic_tracker["relationship issues"] = topic_tracker.get("relationship issues", 0) + recency_weight
-        
+
         if any(w in content for w in ["alone", "lonely", "isolated", "no friends"]):
             emotion_tracker["loneliness"] += 1 * recency_weight
-        
+
         if any(w in content for w in ["work", "job", "boss", "colleague", "office"]):
             topic_tracker["work stress"] = topic_tracker.get("work stress", 0) + recency_weight
-        
+
         # ADDED: Extract key phrases for context
         if idx == 0 or idx == len(to_summarize) - 1:
             snippet = content[:60].strip()
             if snippet and len(snippet) > 15:
                 key_phrases.append(snippet)
-    
+
     # IMPROVED: Build nuanced summary
     summary_parts = []
-    
+
     # Dominant emotions (sorted by intensity)
     dominant_emotions = [k for k, v in emotion_tracker.items() if v > 0.5]
     if dominant_emotions:
-        sorted_emotions = sorted(dominant_emotions, 
-                                key=lambda x: emotion_tracker[x], 
+        sorted_emotions = sorted(dominant_emotions,
+                                key=lambda x: emotion_tracker[x],
                                 reverse=True)[:2]
         summary_parts.append(f"Emotional state: {', '.join(sorted_emotions)}")
-    
+
     # Top topics
     if topic_tracker:
         sorted_topics = sorted(topic_tracker.items(), key=lambda x: x[1], reverse=True)[:2]
         topic_names = [name for name, _ in sorted_topics]
         summary_parts.append(f"Main concerns: {', '.join(topic_names)}")
-    
+
     # Context from key moments
     if key_phrases and len(key_phrases) > 0:
         summary_parts.append(f"Started with: \"{key_phrases[0]}...\"")
-    
+
     if summary_parts:
         return "[Earlier context: " + ". ".join(summary_parts) + "]"
-    
+
     return None
 
 def _clean_message(msg: dict) -> dict:
@@ -396,18 +381,18 @@ def get_optimized_history():
     IMPROVED: Returns conversation history with smart truncation and token optimization.
     """
     history = session.get("history", [])
-    
+
     if len(history) <= 12:
         return history
-    
+
     # Create compact summary
     summary = create_conversation_summary(history)
     recent_messages = history[-12:]
-    
+
     # REFINED: Only add summary if it provides value and isn't too long
     if summary and len(summary) < 200:
         return [{"role": "system", "content": summary}] + recent_messages
-    
+
     return recent_messages
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -420,15 +405,15 @@ def get_dynamic_parameters():
     Prevents over-correction while still being emotionally responsive.
     """
     scores = session.get("scores", {"anxiety": 0, "depression": 0, "joy": 0})
-    
+
     # Base parameters
     temperature = 0.7
     max_tokens = 200
-    
+
     anxiety_level = scores["anxiety"]
     depression_level = scores["depression"]
     joy_level = scores["joy"]
-    
+
     # OPTIMIZED: Gradual adjustment curves (not step functions)
     if anxiety_level > 60:
         temperature = 0.55
@@ -438,21 +423,21 @@ def get_dynamic_parameters():
         max_tokens = 185
     elif anxiety_level > 25:
         temperature = 0.68
-    
+
     if depression_level > 60:
         max_tokens = 210
         temperature = max(0.6, temperature - 0.05)
     elif depression_level > 40:
         max_tokens = 205
-    
+
     if joy_level > 50:
         temperature = min(0.75, temperature + 0.05)
         max_tokens = 175
-    
+
     # ADDED: Safety bounds
     temperature = max(0.5, min(0.8, temperature))
     max_tokens = max(150, min(250, max_tokens))
-    
+
     return {
         "temperature": round(temperature, 2),
         "max_tokens": max_tokens,
@@ -470,10 +455,10 @@ def get_ai_response(messages: list) -> dict:
     """
     try:
         params = get_dynamic_parameters()
-        
+
         # OPTIMIZED: Clean messages before sending
         clean_messages = [_clean_message(msg) for msg in messages]
-        
+
         response = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + clean_messages,
@@ -482,14 +467,14 @@ def get_ai_response(messages: list) -> dict:
             top_p=params["top_p"],
             extra_body={"reasoning_effort": "none"},
         )
-        
+
         content = response.choices[0].message.content.strip()
         return {"content": content, "error": False}
-        
+
     except Exception as e:
         error_type = type(e).__name__
         logger.error(f"Groq API failed: {error_type} - {str(e)}")
-        
+
         if "timeout" in str(e).lower():
             fallback = "ugh, that took too long — can you try saying that again? 🙏"
         elif "rate" in str(e).lower() or "429" in str(e):
@@ -498,7 +483,7 @@ def get_ai_response(messages: list) -> dict:
             fallback = "something's wrong on my end (auth issue) — this shouldn't happen. can you let Anshu know? 🙏"
         else:
             fallback = "ugh, something went wrong — can you try again? if this keeps happening, something might be off 🙏"
-        
+
         return {"content": fallback, "error": True}
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -512,7 +497,7 @@ def update_session_scores(user_message: str):
 
     text = user_message.lower()
     scores = session["scores"]
-    
+
     anxiety_words = [
         "anxious", "panic", "nervous", "worried", "dread", "fear", "tense",
         "overwhelmed", "stress", "racing thoughts", "can't breathe", "shaking"
@@ -525,26 +510,26 @@ def update_session_scores(user_message: str):
         "happy", "great", "excited", "proud", "wonderful", "glad",
         "grateful", "better", "good", "amazing", "relieved", "hopeful"
     ]
-    
+
     for word in anxiety_words:
         if word in text:
             scores["anxiety"] = min(100, scores["anxiety"] + 5)
-    
+
     for word in depression_words:
         if word in text:
             scores["depression"] = min(100, scores["depression"] + 5)
-    
+
     for word in joy_words:
         if word in text:
             scores["joy"] = min(100, scores["joy"] + 5)
             scores["anxiety"] = max(0, scores["anxiety"] - 2)
             scores["depression"] = max(0, scores["depression"] - 2)
-    
+
     # Natural decay
     scores["anxiety"] = max(0, scores["anxiety"] - 0.5)
     scores["depression"] = max(0, scores["depression"] - 0.5)
     scores["joy"] = max(0, scores["joy"] - 0.3)
-    
+
     session["scores"] = scores
     session.modified = True
 
@@ -574,12 +559,12 @@ def _trim_session_if_needed():
 @app.route("/")
 def index():
     """Initialize new session."""
-    session.clear()
-    session["history"] = []
-    session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
-    session["msg_count"] = 0
-    session["started_at"] = datetime.now().isoformat()
-    session["crisis_detected"] = False
+    if "history" not in session:
+        session["history"] = []
+        session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
+        session["msg_count"] = 0
+        session["started_at"] = datetime.now().isoformat()
+        session["crisis_detected"] = False
     return render_template("index.html")
 
 
@@ -607,32 +592,32 @@ def chat():
     # 🧠 BUILD OPTIMIZED HISTORY
     history = session.get("history", [])
     history.append({"role": "user", "content": user_text})
-    
+
     optimized_history = get_optimized_history()
 
     # 🤖 GET AI RESPONSE
     ai_response = get_ai_response(optimized_history)
     reply = ai_response["content"]
-    
+
     history.append({"role": "assistant", "content": reply})
-    
+
     # IMPROVED: Smarter history trimming
     if len(history) > 30:
         history = history[-30:]
-    
+
     session["history"] = history
     session["msg_count"] = session.get("msg_count", 0) + 1
 
     # 📊 UPDATE SCORES
     update_session_scores(user_text)
-    
+
     # ADDED: Trim session if needed
     _trim_session_if_needed()
 
     # 💬 PERIODIC NUDGE
     scores = session.get("scores", {})
     nudge = None
-    
+
     if (session["msg_count"] % 12 == 0 and
             scores.get("anxiety", 0) + scores.get("depression", 0) > 30):
         nudge = (
@@ -667,14 +652,14 @@ def load_session():
     """Load previous conversation."""
     data = request.get_json()
     messages = data.get("messages", [])
-    
+
     session.clear()
     session["history"] = messages[-30:]
     session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
     session["msg_count"] = len(messages)
     session["crisis_detected"] = False
     session.modified = True
-    
+
     return jsonify({"ok": True})
 
 
@@ -695,9 +680,9 @@ def health_check():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug_mode = os.environ.get("FLASK_ENV") == "development"
-    
+
     if not debug_mode and app.secret_key == "peacoo-secret-2024-change-this":
         logger.warning("⚠️  WARNING: Using default secret key in production!")
-    
+
     logger.info(f"🚀 Starting Peacoo AI on port {port}")
     app.run(host="0.0.0.0", port=port, debug=debug_mode)
