@@ -9,14 +9,32 @@ import re
 import json
 import hashlib
 import logging
+import threading
 from datetime import datetime, timedelta
 from collections import defaultdict
 from flask import Flask, request, jsonify, render_template, session
 from openai import OpenAI
 from functools import wraps
 
+DEFAULT_SECRET_KEY = "peacoo-secret-2024-change-this"
+FLASK_ENV = os.environ.get("FLASK_ENV", "production").lower()
+DEBUG_MODE = FLASK_ENV == "development"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+if not DEBUG_MODE and not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set outside development.")
+
+if not DEBUG_MODE and not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY must be set outside development.")
+
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "peacoo-secret-2024-change-this")
+app.secret_key = SECRET_KEY or DEFAULT_SECRET_KEY
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=not DEBUG_MODE,
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 📝 Structured Logging Setup
@@ -32,12 +50,18 @@ logger = logging.getLogger(__name__)
 # ✨ Groq Client
 # ══════════════════════════════════════════════════════════════════════════════
 client = OpenAI(
-    api_key=os.environ.get("GROQ_API_KEY"),
+    api_key=GROQ_API_KEY,
     base_url="https://api.groq.com/openai/v1",
     timeout=20.0,
     max_retries=2,
 )
 MODEL = "qwen/qwen3-32b"
+MAX_USER_MESSAGE_CHARS = 2000
+MAX_HISTORY_MESSAGES = 24
+MAX_SUMMARIZED_MESSAGES = 10
+MAX_SESSION_SIZE_KB = 3.5
+MAX_LOAD_SESSION_MESSAGES = 24
+VALID_HISTORY_ROLES = {"user", "assistant"}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 🚨 Advanced Crisis Detection
@@ -80,9 +104,14 @@ CRISIS_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in CRISIS_PATTERN
 
 FALSE_POSITIVE_CONTEXTS = [
     r"\b(movie|song|book|show|game|character|lyrics|quote)\b",
-    r"\b(felt|used to|before|past|yesterday|ago)\b",
 ]
 FALSE_POSITIVE_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in FALSE_POSITIVE_CONTEXTS]
+
+CURRENT_RISK_HINTS = [
+    r"\b(right now|still|again|tonight|today|currently|at the moment)\b",
+    r"\b(i am|i'm|ive been|i have been|keep|can't stop|cannot stop)\b",
+]
+CURRENT_RISK_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in CURRENT_RISK_HINTS]
 
 def _has_false_positive_context(text: str) -> bool:
     for fp_pattern in FALSE_POSITIVE_REGEX:
@@ -90,16 +119,23 @@ def _has_false_positive_context(text: str) -> bool:
             return True
     return False
 
+
+def _has_current_risk_hint(text: str) -> bool:
+    for risk_pattern in CURRENT_RISK_REGEX:
+        if risk_pattern.search(text):
+            return True
+    return False
+
 def is_crisis(text: str) -> bool:
     text_lower = text.lower()
     for keyword in CRISIS_KEYWORDS:
         if keyword in text_lower:
-            if _has_false_positive_context(text):
+            if _has_false_positive_context(text) and not _has_current_risk_hint(text):
                 continue
             return True
     for pattern in CRISIS_REGEX:
         if pattern.search(text):
-            if _has_false_positive_context(text):
+            if _has_false_positive_context(text) and not _has_current_risk_hint(text):
                 continue
             return True
     return False
@@ -267,13 +303,15 @@ Tu yahan fix karne nahi — samjhne aur saath rehne aaya hai 💚
 # ⏱️ Rate Limiting
 # ══════════════════════════════════════════════════════════════════════════════
 rate_limit_store = defaultdict(list)
+rate_limit_lock = threading.Lock()
 RATE_LIMIT_WINDOW = 60
 RATE_LIMIT_MAX_REQUESTS = 20
 
 def get_client_identifier():
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    forwarded_for = request.headers.get('X-Forwarded-For', '')
+    ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.remote_addr
     ua = request.headers.get('User-Agent', '')
-    return hashlib.md5(f"{ip}:{ua}".encode()).hexdigest()
+    return hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()
 
 def rate_limit(f):
     @wraps(f)
@@ -301,10 +339,9 @@ def create_conversation_summary(messages):
     if len(messages) < 15:
         return None
 
-    to_summarize = messages[:-10]
+    to_summarize = messages[:-MAX_SUMMARIZED_MESSAGES]
     emotion_tracker = {"anxiety": 0, "depression": 0, "stress": 0, "loneliness": 0}
     topic_tracker = {}
-    key_phrases = []
     total_msgs = len(to_summarize)
 
     for idx, msg in enumerate(to_summarize):
@@ -338,11 +375,6 @@ def create_conversation_summary(messages):
         if any(w in content for w in ["work", "job", "boss", "colleague", "office"]):
             topic_tracker["work stress"] = topic_tracker.get("work stress", 0) + recency_weight
 
-        if idx == 0 or idx == len(to_summarize) - 1:
-            snippet = content[:60].strip()
-            if snippet and len(snippet) > 15:
-                key_phrases.append(snippet)
-
     summary_parts = []
     dominant_emotions = [k for k, v in emotion_tracker.items() if v > 0.5]
     if dominant_emotions:
@@ -353,9 +385,6 @@ def create_conversation_summary(messages):
         sorted_topics = sorted(topic_tracker.items(), key=lambda x: x[1], reverse=True)[:2]
         topic_names = [name for name, _ in sorted_topics]
         summary_parts.append(f"Main concerns: {', '.join(topic_names)}")
-
-    if key_phrases:
-        summary_parts.append(f"Started with: \"{key_phrases[0]}...\"")
 
     if summary_parts:
         return "[Earlier context: " + ". ".join(summary_parts) + "]"
@@ -370,11 +399,11 @@ def _clean_message(msg: dict) -> dict:
 
 def get_optimized_history():
     history = session.get("history", [])
-    if len(history) <= 12:
+    if len(history) <= MAX_HISTORY_MESSAGES // 2:
         return history
 
     summary = create_conversation_summary(history)
-    recent_messages = history[-12:]
+    recent_messages = history[-(MAX_HISTORY_MESSAGES // 2):]
 
     if summary and len(summary) < 200:
         return [{"role": "system", "content": summary}] + recent_messages
@@ -532,18 +561,65 @@ def update_session_scores(user_message: str):
 # 🗄️ Session Size Management
 # ══════════════════════════════════════════════════════════════════════════════
 
-MAX_SESSION_SIZE_KB = 4
-
 def _get_session_size() -> float:
     session_data = dict(session)
     return len(json.dumps(session_data).encode('utf-8')) / 1024
 
 def _trim_session_if_needed():
-    if _get_session_size() > MAX_SESSION_SIZE_KB:
+    while _get_session_size() > MAX_SESSION_SIZE_KB:
         history = session.get("history", [])
-        session["history"] = history[-15:]
+        if len(history) <= 6:
+            break
+        session["history"] = history[-max(6, len(history) - 4):]
         session.modified = True
         logger.warning("Session trimmed due to size limit")
+
+
+def initialize_session_state() -> None:
+    session.setdefault("history", [])
+    session.setdefault("scores", {"anxiety": 0, "depression": 0, "joy": 0})
+    session.setdefault("msg_count", 0)
+    session.setdefault("started_at", datetime.now().isoformat())
+    session.setdefault("crisis_detected", False)
+
+
+def reset_session_state() -> None:
+    session.clear()
+    initialize_session_state()
+    session.modified = True
+
+
+def get_json_body():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+def sanitize_message_content(value: str, *, max_chars: int = MAX_USER_MESSAGE_CHARS) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = re.sub(r"\s+", " ", value).strip()
+    return normalized[:max_chars]
+
+
+def sanitize_history_messages(messages) -> list:
+    if not isinstance(messages, list):
+        return []
+
+    cleaned_messages = []
+    for raw_msg in messages[-MAX_LOAD_SESSION_MESSAGES:]:
+        if not isinstance(raw_msg, dict):
+            continue
+        role = raw_msg.get("role")
+        if role not in VALID_HISTORY_ROLES:
+            continue
+        content = sanitize_message_content(raw_msg.get("content", ""))
+        if not content:
+            continue
+        cleaned_messages.append({"role": role, "content": content})
+
+    return cleaned_messages[-MAX_HISTORY_MESSAGES:]
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 🛣️ ROUTES
@@ -551,20 +627,19 @@ def _trim_session_if_needed():
 
 @app.route("/")
 def index():
-    if "history" not in session:
-        session["history"] = []
-        session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
-        session["msg_count"] = 0
-        session["started_at"] = datetime.now().isoformat()
-        session["crisis_detected"] = False
+    initialize_session_state()
     return render_template("index.html")
 
 
 @app.route("/chat", methods=["POST"])
 @rate_limit
 def chat():
-    data = request.get_json()
-    user_text = (data.get("message") or "").strip()
+    initialize_session_state()
+    data = get_json_body()
+    if data is None:
+        return jsonify({"error": "invalid_json"}), 400
+
+    user_text = sanitize_message_content(data.get("message", ""))
 
     if not user_text:
         return jsonify({"error": "empty"}), 400
@@ -583,7 +658,7 @@ def chat():
     # 🧠 BUILD OPTIMIZED HISTORY
     history = session.get("history", [])
     history.append({"role": "user", "content": user_text})
-    session["history"] = history
+    session["history"] = history[-MAX_HISTORY_MESSAGES:]
     session.modified = True
 
     optimized_history = get_optimized_history()
@@ -594,8 +669,8 @@ def chat():
 
     history.append({"role": "assistant", "content": reply})
 
-    if len(history) > 30:
-        history = history[-30:]
+    if len(history) > MAX_HISTORY_MESSAGES:
+        history = history[-MAX_HISTORY_MESSAGES:]
 
     session["history"] = history
     session["msg_count"] = session.get("msg_count", 0) + 1
@@ -629,24 +704,24 @@ def chat():
 
 @app.route("/reset", methods=["POST"])
 def reset():
-    session.clear()
-    session["history"] = []
-    session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
-    session["msg_count"] = 0
-    session["crisis_detected"] = False
+    reset_session_state()
     return jsonify({"ok": True})
 
 
 @app.route("/load_session", methods=["POST"])
 def load_session():
-    data = request.get_json()
-    messages = data.get("messages", [])
-    session.clear()
-    session["history"] = messages[-30:]
+    data = get_json_body()
+    if data is None:
+        return jsonify({"error": "invalid_json"}), 400
+
+    messages = sanitize_history_messages(data.get("messages", []))
+    reset_session_state()
+    session["history"] = messages
     session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
     session["msg_count"] = len(messages)
     session["crisis_detected"] = False
     session.modified = True
+    _trim_session_if_needed()
     return jsonify({"ok": True})
 
 
@@ -665,9 +740,9 @@ def health_check():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    debug_mode = os.environ.get("FLASK_ENV") == "development"
+    debug_mode = DEBUG_MODE
 
-    if not debug_mode and app.secret_key == "peacoo-secret-2024-change-this":
+    if not debug_mode and app.secret_key == DEFAULT_SECRET_KEY:
         logger.warning("⚠️  WARNING: Using default secret key in production!")
 
     logger.info(f"🚀 Starting Peacoo AI on port {port}")
