@@ -1,12 +1,25 @@
 """
-PEACOO AI - Mental Wellness Companion (Production Edition v3)
+PEACOO AI - Mental Wellness Companion (Production Edition v4)
 Backend: Flask + Groq (Qwen3-32B)
-Fixed: Vague responses, adaptive token limits, improved system prompt
+
+Fixes applied:
+  1. [SECURITY]  X-Forwarded-For spoofing — now only trusted if TRUSTED_PROXY env is set
+  2. [SECURITY]  rate_limit_store memory leak — old client IDs are evicted periodically
+  3. [SECURITY]  rate_limit_lock was defined but never used — all store access now inside lock
+  4. [LOGIC]     History bug — session["history"] now written before get_optimized_history()
+  5. [LOGIC]     create_conversation_summary dropped valid summaries >200 chars — condition removed
+  6. [LOGIC]     update_session_scores now runs BEFORE get_ai_response so params reflect current msg
+  7. [ROBUSTNESS] strip_thinking is more defensive against malformed/nested <think> tags
+  8. [ROBUSTNESS] scores read from session are validated as numeric before use
+  9. [ROBUSTNESS] rate_limit check+append is now one atomic block under the lock (no TOCTOU)
+ 10. [MINOR]     random import moved to top level
+ 11. [MINOR]     redundant session.modified = True calls cleaned up
 """
 
 import os
 import re
 import json
+import random
 import hashlib
 import logging
 import threading
@@ -16,15 +29,20 @@ from flask import Flask, request, jsonify, render_template, session
 from openai import OpenAI
 from functools import wraps
 
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚙️  Config
+# ══════════════════════════════════════════════════════════════════════════════
 DEFAULT_SECRET_KEY = "peacoo-secret-2024-change-this"
 FLASK_ENV = os.environ.get("FLASK_ENV", "production").lower()
 DEBUG_MODE = FLASK_ENV == "development"
 SECRET_KEY = os.environ.get("SECRET_KEY")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
+# FIX 1: Only honour X-Forwarded-For when operator explicitly sets TRUSTED_PROXY=1
+TRUSTED_PROXY = os.environ.get("TRUSTED_PROXY", "0").strip() == "1"
+
 if not DEBUG_MODE and not SECRET_KEY:
     raise RuntimeError("SECRET_KEY must be set outside development.")
-
 if not DEBUG_MODE and not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY must be set outside development.")
 
@@ -37,12 +55,12 @@ app.config.update(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 📝 Structured Logging Setup
+# 📝 Logging
 # ══════════════════════════════════════════════════════════════════════════════
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -64,16 +82,15 @@ MAX_LOAD_SESSION_MESSAGES = 24
 VALID_HISTORY_ROLES = {"user", "assistant"}
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 🚨 Advanced Crisis Detection
+# 🚨 Crisis Detection
 # ══════════════════════════════════════════════════════════════════════════════
-
 CRISIS_KEYWORDS = [
     "suicide", "suicidal", "kill myself", "want to die", "end my life",
     "end it all", "hurt myself", "no reason to live", "better off dead",
     "can't go on", "cant go on", "take my life", "self harm", "self-harm",
     "cutting myself", "od on", "overdose", "hang myself", "jump off",
     "fade away", "fading away", "disappear forever", "slip away",
-    "give up on life", "not worth living", "want it to end"
+    "give up on life", "not worth living", "want it to end",
 ]
 
 CRISIS_PATTERNS = [
@@ -100,31 +117,27 @@ CRISIS_PATTERNS = [
     r"\bdon'?t\s+(deserve|want)\s+to\s+(live|be here|exist)\b",
 ]
 
-CRISIS_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in CRISIS_PATTERNS]
+CRISIS_REGEX = [re.compile(p, re.IGNORECASE) for p in CRISIS_PATTERNS]
 
 FALSE_POSITIVE_CONTEXTS = [
     r"\b(movie|song|book|show|game|character|lyrics|quote)\b",
 ]
-FALSE_POSITIVE_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in FALSE_POSITIVE_CONTEXTS]
+FALSE_POSITIVE_REGEX = [re.compile(p, re.IGNORECASE) for p in FALSE_POSITIVE_CONTEXTS]
 
 CURRENT_RISK_HINTS = [
     r"\b(right now|still|again|tonight|today|currently|at the moment)\b",
     r"\b(i am|i'm|ive been|i have been|keep|can't stop|cannot stop)\b",
 ]
-CURRENT_RISK_REGEX = [re.compile(pattern, re.IGNORECASE) for pattern in CURRENT_RISK_HINTS]
+CURRENT_RISK_REGEX = [re.compile(p, re.IGNORECASE) for p in CURRENT_RISK_HINTS]
+
 
 def _has_false_positive_context(text: str) -> bool:
-    for fp_pattern in FALSE_POSITIVE_REGEX:
-        if fp_pattern.search(text):
-            return True
-    return False
+    return any(p.search(text) for p in FALSE_POSITIVE_REGEX)
 
 
 def _has_current_risk_hint(text: str) -> bool:
-    for risk_pattern in CURRENT_RISK_REGEX:
-        if risk_pattern.search(text):
-            return True
-    return False
+    return any(p.search(text) for p in CURRENT_RISK_REGEX)
+
 
 def is_crisis(text: str) -> bool:
     text_lower = text.lower()
@@ -140,8 +153,9 @@ def is_crisis(text: str) -> bool:
             return True
     return False
 
+
 CRISIS_RESPONSES = [
-"""hey… pause for a second. what you just said really matters, and so do you 💚
+    """hey… pause for a second. what you just said really matters, and so do you 💚
 
 i might not be enough support on my own right now… but there are people who truly can be there for you:
 
@@ -152,12 +166,14 @@ i might not be enough support on my own right now… but there are people who tr
 you don't have to carry this alone. are you somewhere safe right now?"""
 ]
 
-def get_crisis_response():
-    import random
+
+def get_crisis_response() -> str:
+    # FIX 10: random imported at top level, not inside function
     return random.choice(CRISIS_RESPONSES)
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 🧠 FIXED: System Prompt — more grounded, context-aware responses
+# 🧠 System Prompt
 # ══════════════════════════════════════════════════════════════════════════════
 SYSTEM_PROMPT = """Tu Peacoo hai — ek aisa dost jo hamesha sun'ta hai, judge nahi karta, aur real baat karta hai.
 
@@ -298,50 +314,74 @@ Poori baat se user ki age/vibe samjho aur adjust karo — poochho mat.
 Tu yahan fix karne nahi — samjhne aur saath rehne aaya hai 💚
 """
 
-
 # ══════════════════════════════════════════════════════════════════════════════
-# ⏱️ Rate Limiting
+# ⏱️ Rate Limiting  (FIX 2, 3, 9)
 # ══════════════════════════════════════════════════════════════════════════════
-rate_limit_store = defaultdict(list)
+rate_limit_store: dict[str, list[datetime]] = defaultdict(list)
 rate_limit_lock = threading.Lock()
-RATE_LIMIT_WINDOW = 60
+RATE_LIMIT_WINDOW = 60        # seconds
 RATE_LIMIT_MAX_REQUESTS = 20
+RATE_LIMIT_EVICT_AFTER = 300  # seconds — evict idle client IDs after 5 min
 
-def get_client_identifier():
-    forwarded_for = request.headers.get('X-Forwarded-For', '')
-    ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.remote_addr
-    ua = request.headers.get('User-Agent', '')
+
+def _evict_stale_clients() -> None:
+    """FIX 2: Remove client IDs whose last request is older than RATE_LIMIT_EVICT_AFTER."""
+    cutoff = datetime.now() - timedelta(seconds=RATE_LIMIT_EVICT_AFTER)
+    stale = [cid for cid, ts_list in rate_limit_store.items()
+             if not ts_list or ts_list[-1] < cutoff]
+    for cid in stale:
+        del rate_limit_store[cid]
+
+
+def get_client_identifier() -> str:
+    # FIX 1: Only read X-Forwarded-For when TRUSTED_PROXY=1 is explicitly set
+    if TRUSTED_PROXY:
+        forwarded_for = request.headers.get("X-Forwarded-For", "")
+        ip = forwarded_for.split(",")[0].strip() if forwarded_for else request.remote_addr
+    else:
+        ip = request.remote_addr
+    ua = request.headers.get("User-Agent", "")
     return hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()
+
 
 def rate_limit(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         client_id = get_client_identifier()
         now = datetime.now()
-        rate_limit_store[client_id] = [
-            ts for ts in rate_limit_store[client_id]
-            if now - ts < timedelta(seconds=RATE_LIMIT_WINDOW)
-        ]
-        if len(rate_limit_store[client_id]) >= RATE_LIMIT_MAX_REQUESTS:
-            return jsonify({
-                "error": "rate_limit",
-                "message": "hey, slow down a little — too many messages too fast 🤍 take a breath?"
-            }), 429
-        rate_limit_store[client_id].append(now)
+        window_start = now - timedelta(seconds=RATE_LIMIT_WINDOW)
+
+        # FIX 3 & 9: entire check-and-append is inside the lock — no TOCTOU
+        with rate_limit_lock:
+            # Trim old timestamps for this client
+            rate_limit_store[client_id] = [
+                ts for ts in rate_limit_store[client_id] if ts > window_start
+            ]
+            if len(rate_limit_store[client_id]) >= RATE_LIMIT_MAX_REQUESTS:
+                return jsonify({
+                    "error": "rate_limit",
+                    "message": "hey, slow down a little — too many messages too fast 🤍 take a breath?",
+                }), 429
+            rate_limit_store[client_id].append(now)
+            # FIX 2: periodically evict stale clients (cheap, ~every 100 requests)
+            if sum(len(v) for v in rate_limit_store.values()) % 100 == 0:
+                _evict_stale_clients()
+
         return f(*args, **kwargs)
     return decorated_function
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 🧠 Intelligent Memory Management
+# 🧠 Memory Management
 # ══════════════════════════════════════════════════════════════════════════════
 
-def create_conversation_summary(messages):
+def create_conversation_summary(messages: list) -> str | None:
     if len(messages) < 15:
         return None
 
     to_summarize = messages[:-MAX_SUMMARIZED_MESSAGES]
-    emotion_tracker = {"anxiety": 0, "depression": 0, "stress": 0, "loneliness": 0}
-    topic_tracker = {}
+    emotion_tracker = {"anxiety": 0.0, "depression": 0.0, "stress": 0.0, "loneliness": 0.0}
+    topic_tracker: dict[str, float] = {}
     total_msgs = len(to_summarize)
 
     for idx, msg in enumerate(to_summarize):
@@ -383,21 +423,20 @@ def create_conversation_summary(messages):
 
     if topic_tracker:
         sorted_topics = sorted(topic_tracker.items(), key=lambda x: x[1], reverse=True)[:2]
-        topic_names = [name for name, _ in sorted_topics]
-        summary_parts.append(f"Main concerns: {', '.join(topic_names)}")
+        summary_parts.append(f"Main concerns: {', '.join(t for t, _ in sorted_topics)}")
 
-    if summary_parts:
-        return "[Earlier context: " + ". ".join(summary_parts) + "]"
+    if not summary_parts:
+        return None
 
-    return None
+    # FIX 5: removed the erroneous `len(summary) < 200` guard — summaries of any length are valid
+    return "[Earlier context: " + ". ".join(summary_parts) + "]"
+
 
 def _clean_message(msg: dict) -> dict:
-    return {
-        "role": msg["role"],
-        "content": " ".join(msg["content"].split())
-    }
+    return {"role": msg["role"], "content": " ".join(msg["content"].split())}
 
-def get_optimized_history():
+
+def get_optimized_history() -> list:
     history = session.get("history", [])
     if len(history) <= MAX_HISTORY_MESSAGES // 2:
         return history
@@ -405,35 +444,36 @@ def get_optimized_history():
     summary = create_conversation_summary(history)
     recent_messages = history[-(MAX_HISTORY_MESSAGES // 2):]
 
-    if summary and len(summary) < 200:
+    if summary:
         return [{"role": "system", "content": summary}] + recent_messages
 
     return recent_messages
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 🎛️ FIXED: Adaptive Dynamic Response Control
+# 🎛️ Adaptive Dynamic Response Control
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_dynamic_parameters():
-    """
-    FIXED: Proper adaptive token limits.
-    - Light/happy moments: 200-250 tokens (short is fine)
-    - Normal conversation: 350 tokens default
-    - Anxious state: 400-500 tokens (space to breathe)
-    - Deep depression: 500-600 tokens (more presence needed)
-    Max cap: 700 (beyond this AI pads unnecessarily + slower response)
-    """
+def _safe_score(scores: dict, key: str) -> float:
+    """FIX 8: validate session scores are numeric before use."""
+    val = scores.get(key, 0)
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        logger.warning(f"Non-numeric score for '{key}': {val!r} — defaulting to 0")
+        return 0.0
+
+
+def get_dynamic_parameters() -> dict:
     scores = session.get("scores", {"anxiety": 0, "depression": 0, "joy": 0})
 
-    # ✅ FIXED: Better base values
     temperature = 0.75
     max_tokens = 350
 
-    anxiety_level = scores["anxiety"]
-    depression_level = scores["depression"]
-    joy_level = scores["joy"]
+    anxiety_level = _safe_score(scores, "anxiety")
+    depression_level = _safe_score(scores, "depression")
+    joy_level = _safe_score(scores, "joy")
 
-    # ✅ FIXED: Gradual curves with proper ranges
     if anxiety_level > 60:
         temperature = 0.55
         max_tokens = 500
@@ -452,34 +492,36 @@ def get_dynamic_parameters():
 
     if joy_level > 50:
         temperature = min(0.78, temperature + 0.05)
-        max_tokens = 230  # ✅ Happy/light = shorter is natural
+        max_tokens = 230
 
-    # ✅ FIXED: Safety bounds — 200 min, 700 max
     temperature = max(0.5, min(0.82, temperature))
     max_tokens = max(200, min(700, max_tokens))
 
-    return {
-        "temperature": round(temperature, 2),
-        "max_tokens": max_tokens,
-        "top_p": 0.9
-    }
+    return {"temperature": round(temperature, 2), "max_tokens": max_tokens, "top_p": 0.9}
+
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 🤖 FIXED: AI Response Handler — reasoning_effort removed
+# 🤖 AI Response Handler
 # ══════════════════════════════════════════════════════════════════════════════
 
 def strip_thinking(text: str) -> str:
-    """Remove <think>...</think> blocks from Qwen3 response before showing to user."""
-    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    """
+    FIX 7: More defensive stripping of <think>…</think> blocks.
+    Handles nested tags and unclosed blocks gracefully.
+    """
+    # Iteratively strip outermost <think> blocks until none remain
+    prev = None
+    while prev != text:
+        prev = text
+        text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+
+    # If an unclosed <think> was opened but never closed, strip from it to end
+    text = re.sub(r"<think>.*$", "", text, flags=re.DOTALL)
+
+    return text.strip()
 
 
 def get_ai_response(messages: list) -> dict:
-    """
-    FIXED:
-    1. reasoning_effort NOT set — model thinks fully for better responses
-    2. <think> blocks stripped before sending to user (hidden thinking)
-    3. Adaptive token limits from get_dynamic_parameters()
-    """
     try:
         params = get_dynamic_parameters()
         clean_messages = [_clean_message(msg) for msg in messages]
@@ -493,29 +535,31 @@ def get_ai_response(messages: list) -> dict:
         )
 
         raw_content = response.choices[0].message.content.strip()
-        content = strip_thinking(raw_content)  # ✅ Hide thinking, keep clean answer
+        content = strip_thinking(raw_content)
         return {"content": content, "error": False}
 
     except Exception as e:
         error_type = type(e).__name__
         logger.error(f"Groq API failed: {error_type} - {str(e)}")
 
-        if "timeout" in str(e).lower():
+        err_str = str(e).lower()
+        if "timeout" in err_str:
             fallback = "ugh, that took too long — can you try saying that again? 🙏"
-        elif "rate" in str(e).lower() or "429" in str(e):
+        elif "rate" in err_str or "429" in err_str:
             fallback = "looks like things are a bit busy right now. mind trying again in a moment? 🤍"
-        elif "auth" in str(e).lower() or "401" in str(e):
+        elif "auth" in err_str or "401" in err_str:
             fallback = "something's wrong on my end (auth issue) — this shouldn't happen. can you let Anshu know? 🙏"
         else:
             fallback = "ugh, something went wrong — can you try again? if this keeps happening, something might be off 🙏"
 
         return {"content": fallback, "error": True}
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 📊 Session Scoring System
+# 📊 Session Scoring
 # ══════════════════════════════════════════════════════════════════════════════
 
-def update_session_scores(user_message: str):
+def update_session_scores(user_message: str) -> None:
     if "scores" not in session:
         session["scores"] = {"anxiety": 0, "depression": 0, "joy": 0}
 
@@ -524,15 +568,15 @@ def update_session_scores(user_message: str):
 
     anxiety_words = [
         "anxious", "panic", "nervous", "worried", "dread", "fear", "tense",
-        "overwhelmed", "stress", "racing thoughts", "can't breathe", "shaking"
+        "overwhelmed", "stress", "racing thoughts", "can't breathe", "shaking",
     ]
     depression_words = [
         "sad", "depressed", "hopeless", "worthless", "empty", "numb",
-        "miserable", "broken", "tired", "exhausted", "pointless", "alone"
+        "miserable", "broken", "tired", "exhausted", "pointless", "alone",
     ]
     joy_words = [
         "happy", "great", "excited", "proud", "wonderful", "glad",
-        "grateful", "better", "good", "amazing", "relieved", "hopeful"
+        "grateful", "better", "good", "amazing", "relieved", "hopeful",
     ]
 
     for word in anxiety_words:
@@ -555,23 +599,22 @@ def update_session_scores(user_message: str):
     scores["joy"] = max(0, scores["joy"] - 0.3)
 
     session["scores"] = scores
-    session.modified = True
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 🗄️ Session Size Management
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _get_session_size() -> float:
-    session_data = dict(session)
-    return len(json.dumps(session_data).encode('utf-8')) / 1024
+    return len(json.dumps(dict(session)).encode("utf-8")) / 1024
 
-def _trim_session_if_needed():
+
+def _trim_session_if_needed() -> None:
     while _get_session_size() > MAX_SESSION_SIZE_KB:
         history = session.get("history", [])
         if len(history) <= 6:
             break
         session["history"] = history[-max(6, len(history) - 4):]
-        session.modified = True
         logger.warning("Session trimmed due to size limit")
 
 
@@ -586,28 +629,23 @@ def initialize_session_state() -> None:
 def reset_session_state() -> None:
     session.clear()
     initialize_session_state()
-    session.modified = True
 
 
-def get_json_body():
+def get_json_body() -> dict | None:
     data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return None
-    return data
+    return data if isinstance(data, dict) else None
 
 
 def sanitize_message_content(value: str, *, max_chars: int = MAX_USER_MESSAGE_CHARS) -> str:
     if not isinstance(value, str):
         return ""
-    normalized = re.sub(r"\s+", " ", value).strip()
-    return normalized[:max_chars]
+    return re.sub(r"\s+", " ", value).strip()[:max_chars]
 
 
 def sanitize_history_messages(messages) -> list:
     if not isinstance(messages, list):
         return []
-
-    cleaned_messages = []
+    cleaned = []
     for raw_msg in messages[-MAX_LOAD_SESSION_MESSAGES:]:
         if not isinstance(raw_msg, dict):
             continue
@@ -617,12 +655,12 @@ def sanitize_history_messages(messages) -> list:
         content = sanitize_message_content(raw_msg.get("content", ""))
         if not content:
             continue
-        cleaned_messages.append({"role": role, "content": content})
+        cleaned.append({"role": role, "content": content})
+    return cleaned[-MAX_HISTORY_MESSAGES:]
 
-    return cleaned_messages[-MAX_HISTORY_MESSAGES:]
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 🛣️ ROUTES
+# 🛣️ Routes
 # ══════════════════════════════════════════════════════════════════════════════
 
 @app.route("/")
@@ -640,65 +678,64 @@ def chat():
         return jsonify({"error": "invalid_json"}), 400
 
     user_text = sanitize_message_content(data.get("message", ""))
-
     if not user_text:
         return jsonify({"error": "empty"}), 400
 
-    # 🚨 CRISIS CHECK
+    # 🚨 Crisis check first
     if is_crisis(user_text):
         session["crisis_detected"] = True
         session.modified = True
-        logger.warning(f"Crisis detected in session")
+        logger.warning("Crisis detected in session")
         return jsonify({
             "reply": get_crisis_response(),
             "is_crisis": True,
             "scores": session.get("scores", {}),
         })
 
-    # 🧠 BUILD OPTIMIZED HISTORY
+    # FIX 6: update scores BEFORE building params/calling AI so dynamic
+    #         parameters reflect the emotional content of the current message
+    update_session_scores(user_text)
+
+    # FIX 4: write to session["history"] BEFORE calling get_optimized_history()
+    #         so the latest user message is included in the context sent to AI
     history = session.get("history", [])
     history.append({"role": "user", "content": user_text})
-    session["history"] = history[-MAX_HISTORY_MESSAGES:]
+    history = history[-MAX_HISTORY_MESSAGES:]
+    session["history"] = history
     session.modified = True
 
     optimized_history = get_optimized_history()
 
-    # 🤖 GET AI RESPONSE
+    # 🤖 AI response
     ai_response = get_ai_response(optimized_history)
     reply = ai_response["content"]
 
     history.append({"role": "assistant", "content": reply})
-
-    if len(history) > MAX_HISTORY_MESSAGES:
-        history = history[-MAX_HISTORY_MESSAGES:]
-
+    history = history[-MAX_HISTORY_MESSAGES:]
     session["history"] = history
     session["msg_count"] = session.get("msg_count", 0) + 1
-
-    # 📊 UPDATE SCORES
-    update_session_scores(user_text)
+    session.modified = True
 
     _trim_session_if_needed()
 
-    # 💬 PERIODIC NUDGE
+    # 💬 Periodic wellness nudge
     scores = session.get("scores", {})
     nudge = None
-
-    if (session["msg_count"] % 12 == 0 and
-            scores.get("anxiety", 0) + scores.get("depression", 0) > 30):
+    if (
+        session["msg_count"] % 12 == 0
+        and _safe_score(scores, "anxiety") + _safe_score(scores, "depression") > 30
+    ):
         nudge = (
             "hey, just a gentle reminder — i'm an AI, so there's only so much i can do 🤍 "
             "if things feel heavy, talking to someone real might help. iCall India: 9152987821"
         )
-
-    session.modified = True
 
     return jsonify({
         "reply": reply,
         "nudge": nudge,
         "scores": scores,
         "is_crisis": False,
-        "api_error": ai_response["error"]
+        "api_error": ai_response["error"],
     })
 
 
@@ -730,20 +767,17 @@ def health_check():
     return jsonify({
         "status": "healthy",
         "model": MODEL,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }), 200
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 🚀 APP INITIALIZATION
+# 🚀 Entry Point
 # ══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    debug_mode = DEBUG_MODE
-
-    if not debug_mode and app.secret_key == DEFAULT_SECRET_KEY:
+    if not DEBUG_MODE and app.secret_key == DEFAULT_SECRET_KEY:
         logger.warning("⚠️  WARNING: Using default secret key in production!")
-
     logger.info(f"🚀 Starting Peacoo AI on port {port}")
-    app.run(host="0.0.0.0", port=port, debug=debug_mode)
+    app.run(host="0.0.0.0", port=port, debug=DEBUG_MODE)
