@@ -832,7 +832,7 @@ button { user-select: none; -webkit-user-select: none }
       <div class="menu-line"></div>
     </button>
     <div class="header-brand">
-      <div class="brand-avatar">🤖</div>
+      <div class="brand-avatar"><img src="{{ url_for('static', filename='logo.png') }}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;"></div>
       <div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="brand-name">Peacoo</div>
@@ -874,7 +874,7 @@ button { user-select: none; -webkit-user-select: none }
         </div>
         <div class="robot-avatar">
           <div class="robot-antenna"></div>
-          <div class="robot-body">🤖</div>
+          <div class="robot-body"><img src="{{ url_for('static', filename='logo.png') }}" style="width:60px;height:60px;border-radius:18px;object-fit:cover;"></div>
         </div>
         <div class="welcome-label">your gentle companion</div>
         <h1 class="welcome-title">How are you feeling <span>right now?</span></h1>
@@ -1258,7 +1258,7 @@ function appendBotBubbleInstant(text){
   div.className='msg bot';
   var avatar=document.createElement('div');
   avatar.className='msg-avatar bot';
-  avatar.textContent='🤖';
+  avatar.innerHTML='<img src="/static/logo.png" style="width:30px;height:30px;border-radius:9px;object-fit:cover;">';
   var bubble=document.createElement('div');
   bubble.className='bubble';
   applyBoldMarkdown(bubble,normalized);
